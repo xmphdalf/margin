@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 	import { parseMarkdown } from '$lib/markdown.js';
 	import { readerState } from '$lib/state/reader.svelte.js';
 	import SiteHeader from '$lib/components/layout/SiteHeader.svelte';
@@ -12,7 +13,7 @@
 		try {
 			const doc = await parseMarkdown(raw);
 			readerState.setDoc(raw, doc);
-			goto('/read/');
+			goto(resolve('/read/'));
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to parse document.';
 		}

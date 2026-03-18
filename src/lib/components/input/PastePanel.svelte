@@ -8,6 +8,12 @@
 
 	let value = $state('');
 
+	const modKey = $derived(
+		typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform)
+			? '⌘'
+			: 'Ctrl'
+	);
+
 	function handleSubmit(e: Event) {
 		e.preventDefault();
 		const trimmed = value.trim();
@@ -36,7 +42,7 @@
 		disabled={loading}
 	></textarea>
 	<div class="paste-footer">
-		<span class="hint">⌘ + Enter to read</span>
+		<span class="hint">{modKey} + Enter to read</span>
 		<button
 			type="submit"
 			disabled={!value.trim() || loading}

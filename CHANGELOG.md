@@ -19,6 +19,21 @@ _Changes staged here are merged to a version section on each release._
 
 ---
 
+## [0.1.3] — 2026-03-19
+
+### Fixed
+
+- **Navigation broken on GitHub Pages** — `goto('/read/')` did not include the
+  `base` path prefix (`/margin`), causing a 404 on every input submission when
+  deployed to a GitHub Pages sub-path. Fixed by using `resolve('/read/')` from
+  `$app/paths` which correctly prepends the configured base path.
+
+- **Keyboard shortcut hint shows wrong modifier key** — the hint below the paste
+  textarea always showed `⌘ + Enter` regardless of platform. Now detects the OS
+  and shows `Ctrl` on Windows/Linux and `⌘` on macOS.
+
+---
+
 ## [0.1.2] — 2026-03-19
 
 ### Added
