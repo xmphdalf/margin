@@ -1,0 +1,284 @@
+/* Fontsource variable fonts — latin subset */
+@import '@fontsource-variable/inter/wght.css';
+@import '@fontsource-variable/source-serif-4/wght.css';
+@import '@fontsource-variable/source-serif-4/wght-italic.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
+
+@import 'tailwindcss';
+
+/* ─── Dark mode variant (class-based for Tailwind dark: utilities) ─── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Design tokens ─────────────────────────────────────────────────
+   @theme registers tokens as Tailwind utility classes:
+   bg-surface, text-ink, border-border, etc.
+   oklch = perceptually uniform color space (better dark/sepia derivation)
+   ──────────────────────────────────────────────────────────────────── */
+@theme {
+	/* Fonts */
+	--font-serif: 'Source Serif 4 Variable', Georgia, serif;
+	--font-sans:  'Inter Variable', system-ui, sans-serif;
+	--font-mono:  'JetBrains Mono Variable', 'Fira Code', monospace;
+
+	/* Light theme — warm off-white, never pure white */
+	--color-surface:     oklch(0.98 0.008 85);
+	--color-surface-alt: oklch(0.94 0.008 85);
+	--color-ink:         oklch(0.22 0.01 250);
+	--color-ink-muted:   oklch(0.50 0.01 250);
+	--color-accent:      oklch(0.55 0.14 260);
+	--color-border:      oklch(0.88 0.006 85);
+	--color-code-bg:     oklch(0.96 0.003 250);
+}
+
+/* ─── Dark theme overrides ─── */
+.dark {
+	--color-surface:     oklch(0.15 0.008 250);
+	--color-surface-alt: oklch(0.19 0.008 250);
+	--color-ink:         oklch(0.92 0.006 85);
+	--color-ink-muted:   oklch(0.62 0.008 250);
+	--color-accent:      oklch(0.72 0.14 260);
+	--color-border:      oklch(0.26 0.008 250);
+	--color-code-bg:     oklch(0.12 0.005 250);
+}
+
+/* ─── Sepia theme overrides ─── */
+[data-theme='sepia'] {
+	--color-surface:     oklch(0.95 0.03 80);
+	--color-surface-alt: oklch(0.91 0.03 80);
+	--color-ink:         oklch(0.26 0.04 55);
+	--color-ink-muted:   oklch(0.48 0.03 55);
+	--color-accent:      oklch(0.48 0.14 40);
+	--color-border:      oklch(0.82 0.03 75);
+	--color-code-bg:     oklch(0.92 0.02 80);
+}
+
+/* ─── Base ─── */
+html {
+	background-color: var(--color-surface);
+	color: var(--color-ink);
+	/* Smooth theme transitions — suppressed on init by .no-transitions */
+}
+
+html:not(.no-transitions) {
+	transition: background-color 400ms ease, color 400ms ease, border-color 400ms ease;
+}
+
+body {
+	font-family: var(--font-sans);
+	min-height: 100vh;
+}
+
+/* ─── Prose: the core reading container ─── */
+.prose {
+	font-size: var(--prose-size, 1.125rem);
+	line-height: var(--prose-lh, 1.75);
+	max-width: var(--prose-measure, 68ch);
+	color: var(--color-ink);
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+	font-weight: 600;
+	line-height: 1.25;
+	margin-top: 2em;
+	margin-bottom: 0.5em;
+	color: var(--color-ink);
+	scroll-margin-top: 2rem;
+}
+
+.prose h1 { font-size: 2em; }
+.prose h2 { font-size: 1.5em; }
+.prose h3 { font-size: 1.25em; }
+.prose h4 { font-size: 1.1em; }
+
+.prose p {
+	margin-top: 0;
+	margin-bottom: 1.25em;
+}
+
+.prose a {
+	color: var(--color-accent);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.prose a:hover {
+	opacity: 0.8;
+}
+
+.prose ul,
+.prose ol {
+	padding-left: 1.5em;
+	margin-bottom: 1.25em;
+}
+
+.prose li {
+	margin-bottom: 0.25em;
+}
+
+.prose blockquote {
+	border-left: 3px solid var(--color-border);
+	padding-left: 1.25em;
+	margin-left: 0;
+	color: var(--color-ink-muted);
+	font-style: italic;
+}
+
+.prose hr {
+	border: none;
+	border-top: 1px solid var(--color-border);
+	margin: 2.5em 0;
+}
+
+.prose img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 4px;
+}
+
+.prose table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9em;
+	margin-bottom: 1.25em;
+}
+
+.prose th,
+.prose td {
+	border: 1px solid var(--color-border);
+	padding: 0.5em 0.75em;
+	text-align: left;
+}
+
+.prose th {
+	background-color: var(--color-surface-alt);
+	font-weight: 600;
+}
+
+/* Task list items */
+.prose input[type='checkbox'] {
+	margin-right: 0.4em;
+}
+
+/* Inline code */
+.prose code:not(pre code) {
+	font-family: var(--font-mono);
+	font-size: 0.875em;
+	background-color: var(--color-code-bg);
+	padding: 0.15em 0.4em;
+	border-radius: 3px;
+	border: 1px solid var(--color-border);
+}
+
+/* Code blocks */
+.prose pre {
+	font-family: var(--font-mono);
+	font-size: 0.875em;
+	background-color: var(--color-code-bg);
+	border: 1px solid var(--color-border);
+	border-radius: 6px;
+	padding: 1.25em 1.5em;
+	overflow-x: auto;
+	margin-bottom: 1.5em;
+	line-height: 1.6;
+}
+
+.prose pre code {
+	background: none;
+	border: none;
+	padding: 0;
+	font-size: inherit;
+}
+
+/* Heading anchor links (from rehype-autolink-headings) */
+.prose .heading-anchor {
+	opacity: 0;
+	margin-left: 0.4em;
+	color: var(--color-ink-muted);
+	text-decoration: none;
+	font-weight: 400;
+	transition: opacity 200ms ease;
+}
+
+.prose h1:hover .heading-anchor,
+.prose h2:hover .heading-anchor,
+.prose h3:hover .heading-anchor,
+.prose h4:hover .heading-anchor {
+	opacity: 1;
+}
+
+/* ─── Shiki dual-theme: CSS vars switch on .dark ─── */
+.shiki,
+.shiki span {
+	color: var(--shiki-light);
+	background-color: var(--shiki-light-bg);
+}
+
+.dark .shiki,
+.dark .shiki span {
+	color: var(--shiki-dark) !important;
+	background-color: var(--shiki-dark-bg) !important;
+}
+
+/* Override shiki's inline bg on pre */
+.prose pre.shiki {
+	background-color: var(--color-code-bg) !important;
+}
+.dark .prose pre.shiki {
+	background-color: var(--color-code-bg) !important;
+}
+
+/* ─── KaTeX display math ─── */
+.katex-display {
+	overflow-x: auto;
+	padding: 0.5em 0;
+}
+
+/* ─── Focus mode: hide chrome ─── */
+[data-mode='focus'] .site-header,
+[data-mode='focus'] .toc-panel,
+[data-mode='focus'] .mode-bar,
+[data-mode='focus'] .settings-panel {
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 400ms ease;
+}
+
+/* ─── Screen reader utility ─── */
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border-width: 0;
+}
+
+.sr-only:focus {
+	position: static;
+	width: auto;
+	height: auto;
+	padding: inherit;
+	margin: inherit;
+	overflow: visible;
+	clip: auto;
+	white-space: normal;
+}
+
+/* ─── Reduced motion — always last, always wins ─── */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

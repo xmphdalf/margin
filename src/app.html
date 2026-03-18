@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content="A reader-first Markdown web application. Calm reading, always." />
+		<!--
+			Anti-flash: read persisted theme and apply BEFORE first paint.
+			This script runs synchronously before %sveltekit.head% so there
+			is zero flash of incorrect theme on load.
+		-->
+		<script>
+			(function () {
+				try {
+					var t = localStorage.getItem('margin-theme') || 'light';
+					document.documentElement.setAttribute('data-theme', t);
+					if (t === 'dark') document.documentElement.classList.add('dark');
+					// Suppress transitions during initial paint
+					document.documentElement.classList.add('no-transitions');
+				} catch (e) {}
+			})();
+		</script>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>
