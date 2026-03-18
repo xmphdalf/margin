@@ -19,6 +19,44 @@ _Changes staged here are merged to a version section on each release._
 
 ---
 
+## [0.1.2] — 2026-03-19
+
+### Added
+
+- **Focus mode exit** — pressing `Escape` now returns to Book mode. The mode bar
+  dims to 20% opacity in focus mode and reveals fully on hover, showing an `Esc`
+  hint label. Previously there was no way to exit focus mode without refreshing.
+
+- **Reading mode tooltips** — hovering the B / S / F buttons in the mode bar now
+  shows a tooltip with the full name (Book, Study, Focus).
+
+- **Playwright end-to-end test suite** — 10 tests across the three input flows
+  (Paste, Upload, URL). Covers the happy path for each, plus error cases: invalid
+  file extension shows correct alert, invalid URL scheme is rejected before fetch,
+  HTTP errors from a URL are surfaced, and GitHub blob URLs are verified to
+  auto-normalize to `raw.githubusercontent.com` before fetching. Tests run
+  headlessly against the Vite dev server using only Chromium. Added as a CI gate
+  (runs before build — deploy is blocked if tests fail) and to the local pre-push
+  hook (`npm test` + `npm run validate` on every push to `main`).
+
+### Fixed
+
+- **Text artifact on every page** — The HTML comment in `app.html` contained a
+  literal `%sveltekit.head%` token. SvelteKit's template engine does a
+  first-occurrence string replacement, so the substitution fired inside the
+  comment rather than at the real `<head>` slot, injecting `<link>` preload
+  tags into the comment and leaving the actual placeholder as a visible text
+  node rendered by the browser. Fixed by removing the token from the comment.
+
+- **404 on `/read/` and `/present/` after hard refresh** — The previous
+  `cp build/index.html build/404.html` approach was broken: `index.html` uses
+  a dynamic `new URL(".", location)` base computation that resolves incorrectly
+  when served from a sub-path (e.g. `/margin/read/`). Replaced with a `sed`
+  patch of adapter-static's own `404.html` that corrects `base: ""` to
+  `base: "/margin"` and rewrites `/_app/` asset paths to `/margin/_app/`.
+
+---
+
 ## [0.1.1] — 2026-03-19
 
 ### Fixed
@@ -93,6 +131,7 @@ decision is in place so no rewrites are needed as features land.
 
 ---
 
-[Unreleased]: https://github.com/xmphdalf/margin/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/xmphdalf/margin/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/xmphdalf/margin/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/xmphdalf/margin/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/xmphdalf/margin/releases/tag/v0.1.0

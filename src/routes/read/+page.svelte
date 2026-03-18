@@ -160,4 +160,14 @@
 		pointer-events: none;
 		transition: opacity 400ms ease;
 	}
+
+	/* Focus mode: dim mode bar, reveal on hover — Escape also exits */
+	[data-mode='focus'] :global(.mode-bar) {
+		opacity: 0.2;
+		transition: opacity 400ms ease;
+	}
+
+	[data-mode='focus'] :global(.mode-bar:hover) {
+		opacity: 1;
+	}
 </style>

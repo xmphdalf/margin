@@ -24,3 +24,5 @@ npm-debug.log*
 
 # Fonts — served via @fontsource-variable npm packages, not static files
 static/fonts/
+test-results/
+playwright-report/

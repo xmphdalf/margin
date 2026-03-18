@@ -7,8 +7,8 @@
 		<meta name="description" content="A reader-first Markdown web application. Calm reading, always." />
 		<!--
 			Anti-flash: read persisted theme and apply BEFORE first paint.
-			This script runs synchronously before %sveltekit.head% so there
-			is zero flash of incorrect theme on load.
+			This script runs synchronously in <head>, before first paint,
+			so there is zero flash of incorrect theme on load.
 		-->
 		<script>
 			(function () {

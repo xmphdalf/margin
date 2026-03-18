@@ -93,6 +93,8 @@ npm run dev           # http://localhost:5173
 npm run dev           # start dev server
 npm run check         # TypeScript + Svelte type check (0 errors required)
 npm run build         # production build → build/
+npm run test          # Playwright end-to-end tests (10 tests across 3 inputs)
+npm run test:ui       # Playwright visual debugger — useful for investigating failures
 npm run validate      # check + build — mirrors CI exactly, run before pushing
 npm run preview       # serve the production build locally
 npm run setup-hooks   # install git pre-push hook

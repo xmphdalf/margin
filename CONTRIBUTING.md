@@ -49,15 +49,17 @@ Write code
    │
    ▼
 git push  ←─ pre-push hook runs automatically
-   │           npm run check   (type-check, 0 errors required)
-   │           npm run build   (production build must succeed)
-   │           if either fails → push is blocked, fix locally
+   │           npm test         (10 Playwright tests — 3 input flows)
+   │           npm run check    (type-check, 0 errors required)
+   │           npm run build    (production build must succeed)
+   │           if any fails → push is blocked, fix locally
    │
    ▼
 GitHub Actions (CI)
+   │  npm test          (Playwright, Chromium only)
    │  npm run check
    │  npm run build
-   │  if either fails → deploy is cancelled, you get an email
+   │  if any fails → deploy is cancelled, you get an email
    │
    ▼
 GitHub Pages deployed
@@ -78,6 +80,7 @@ git push --no-verify
 
 ## Before you open a pull request
 
+- [ ] `npm test` passes — all 10 Playwright tests green
 - [ ] `npm run validate` passes (`check` + `build`, zero errors, zero warnings)
 - [ ] Changes look correct across all three themes: Light, Dark, Sepia
 - [ ] No `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, or any suppression annotation

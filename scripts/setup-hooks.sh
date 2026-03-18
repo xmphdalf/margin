@@ -15,7 +15,7 @@ fi
 cat > "${PRE_PUSH}" << 'EOF'
 #!/usr/bin/env bash
 # Pre-push hook — mirrors the CI pipeline locally.
-# Blocks the push if type-check or build fails.
+# Blocks the push if tests, type-check, or build fails.
 
 set -euo pipefail
 
@@ -29,11 +29,12 @@ fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  Pre-push: running validate (check + build)"
+echo "  Pre-push: running tests + validate (check + build)"
 echo "  Same steps CI will run — fix here, not on GitHub."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
+npm test
 npm run validate
 
 echo ""
@@ -46,7 +47,7 @@ EOF
 chmod +x "${PRE_PUSH}"
 
 echo "Git pre-push hook installed."
-echo "Every push to main will now run: npm run validate (check + build)"
+echo "Every push to main will now run: npm test + npm run validate (check + build)"
 echo ""
 echo "To skip in an emergency (use sparingly):"
 echo "  git push --no-verify"

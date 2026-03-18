@@ -15,8 +15,37 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ─── Test ───────────────────────────────────────────────────────────────────
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npm test
+
+      - name: Upload test report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
   # ─── Build ──────────────────────────────────────────────────────────────────
   build:
+    needs: test
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -60,12 +89,17 @@ jobs:
         env:
           BASE_PATH: /${{ github.event.repository.name }}
 
-      - name: Fix SPA fallback for GitHub Pages
-        # GitHub Pages serves 404.html for unknown paths.
-        # adapter-static's generated 404.html uses absolute paths that break
-        # under a BASE_PATH sub-directory. Overwrite it with index.html which
-        # uses correct relative paths — making it a proper SPA shell.
-        run: cp build/index.html build/404.html
+      - name: Fix SPA fallback for GitHub Pages sub-path
+        # adapter-static's generated 404.html has base: "" and /_app/ paths —
+        # both missing the /margin prefix. Patch them in-place so GitHub Pages
+        # serves a working SPA shell for /read/ and /present/ on hard refresh.
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+        run: |
+          sed -i \
+            -e "s|base: \"\"|base: \"${BASE_PATH}\"|" \
+            -e "s|\"/_app/|\"${BASE_PATH}/_app/|g" \
+            build/404.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
