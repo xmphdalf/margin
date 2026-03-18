@@ -60,6 +60,13 @@ jobs:
         env:
           BASE_PATH: /${{ github.event.repository.name }}
 
+      - name: Fix SPA fallback for GitHub Pages
+        # GitHub Pages serves 404.html for unknown paths.
+        # adapter-static's generated 404.html uses absolute paths that break
+        # under a BASE_PATH sub-directory. Overwrite it with index.html which
+        # uses correct relative paths — making it a proper SPA shell.
+        run: cp build/index.html build/404.html
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

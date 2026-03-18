@@ -19,6 +19,18 @@ _Changes staged here are merged to a version section on each release._
 
 ---
 
+## [0.1.1] — 2026-03-19
+
+### Fixed
+
+- SPA routing on GitHub Pages — `/read/` and `/present/` returned 404 because
+  adapter-static's generated `404.html` used absolute asset paths that broke
+  under the `/margin` BASE_PATH sub-directory. Build step now copies `index.html`
+  (which uses correct relative paths) over `404.html` so GitHub Pages serves the
+  proper SPA shell for all unknown sub-paths and client-side routing takes over.
+
+---
+
 ## [0.1.0] — 2026-03-19
 
 Initial scaffold release. Full production-grade foundation — every architectural
@@ -81,5 +93,6 @@ decision is in place so no rewrites are needed as features land.
 
 ---
 
-[Unreleased]: https://github.com/xmphdalf/margin/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/xmphdalf/margin/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/xmphdalf/margin/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/xmphdalf/margin/releases/tag/v0.1.0
