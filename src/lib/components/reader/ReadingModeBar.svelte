@@ -1,18 +1,52 @@
 <script lang="ts">
 	import { readerState } from '$lib/state/reader.svelte.js';
 	import type { ReadingMode } from '$lib/types.js';
+	import { scrollToElement } from '$lib/utils/scroll.js';
 	import { onMount } from 'svelte';
 
 	const modes: { id: ReadingMode; label: string; tooltip: string }[] = [
 		{ id: 'book', label: 'B', tooltip: 'Book' },
+		{ id: 'story', label: 'N', tooltip: 'Story' },
 		{ id: 'study', label: 'S', tooltip: 'Study' },
 		{ id: 'focus', label: 'F', tooltip: 'Focus' }
 	];
 
+	function jumpSection(dir: 1 | -1): void {
+		const toc = readerState.doc?.toc ?? [];
+		if (toc.length === 0) return;
+		const currentIdx = toc.findIndex((e) => e.id === readerState.activeHeading);
+		let nextIdx: number;
+		if (currentIdx === -1) {
+			nextIdx = dir === 1 ? 0 : toc.length - 1;
+		} else {
+			nextIdx = currentIdx + dir;
+		}
+		if (nextIdx < 0 || nextIdx >= toc.length) return;
+		const target = toc[nextIdx];
+		if (target) {
+			readerState.setActiveHeading(target.id);
+			scrollToElement(target.id);
+		}
+	}
+
 	onMount(() => {
 		function handleKeydown(e: KeyboardEvent) {
+			// Don't fire when user is typing
+			const tag = (e.target as HTMLElement).tagName;
+			if (
+				tag === 'INPUT' ||
+				tag === 'TEXTAREA' ||
+				(e.target as HTMLElement).isContentEditable
+			) {
+				return;
+			}
+
 			if (e.key === 'Escape' && readerState.mode === 'focus') {
 				readerState.setMode('book');
+			} else if (e.key === 'j' || e.key === 'J') {
+				jumpSection(1);
+			} else if (e.key === 'k' || e.key === 'K') {
+				jumpSection(-1);
 			}
 		}
 		window.addEventListener('keydown', handleKeydown);

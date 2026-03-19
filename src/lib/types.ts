@@ -1,5 +1,5 @@
 export type Theme = 'light' | 'dark' | 'sepia';
-export type ReadingMode = 'book' | 'focus' | 'study';
+export type ReadingMode = 'book' | 'focus' | 'study' | 'story';
 export type FontFamily = 'serif' | 'sans';
 export type Measure = 'narrow' | 'default' | 'wide';
 

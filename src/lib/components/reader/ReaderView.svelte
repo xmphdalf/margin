@@ -10,10 +10,17 @@
 
 	let { doc }: Props = $props();
 
-	// Reading time display — could show "N min left" based on scroll in future
-	const readingTimeLabel = $derived(
-		doc.readingTime === 1 ? '1 min read' : `${doc.readingTime} min read`
-	);
+	// Reading time display — "N min read" at start, "N min left" as you scroll
+	const readingTimeLabel = $derived.by((): string => {
+		const progress = readerState.scrollProgress;
+		const total = doc.readingTime;
+		if (progress < 0.05) {
+			return total === 1 ? '1 min read' : `${total} min read`;
+		}
+		const remaining = Math.ceil(total * (1 - progress));
+		if (remaining <= 0) return 'Done';
+		return remaining === 1 ? '1 min left' : `${remaining} min left`;
+	});
 </script>
 
 <div class="reader-layout" data-mode={readerState.mode}>
@@ -59,10 +66,10 @@
 		max-width: 90rem;
 		margin: 0 auto;
 		padding: 3rem 2rem 8rem;
-		align-items: flex-start;
+		align-items: stretch;
 	}
 
-	/* TOC sidebar — only fully visible in study mode */
+	/* TOC sidebar — rendered in DOM for study mode (fixed position, out of flow) */
 	.toc-sidebar {
 		display: none;
 	}
@@ -77,10 +84,11 @@
 		min-width: 0;
 		max-width: var(--prose-measure, 68ch);
 		margin: 0 auto;
+		align-self: flex-start;
 	}
 
 	[data-mode='study'] .content-column {
-		margin: 0; /* Left-aligned in study mode, TOC provides the balance */
+		margin: 0;
 	}
 
 	.doc-header {

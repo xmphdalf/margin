@@ -64,6 +64,53 @@
 			isFullscreen = false;
 		}
 	}
+
+	let slideAreaEl = $state<HTMLElement | null>(null);
+
+	$effect(() => {
+		if (!slideAreaEl) return;
+
+		let startX = 0;
+		let startY = 0;
+		let didSwipe = false;
+
+		function onPointerDown(e: PointerEvent) {
+			startX = e.clientX;
+			startY = e.clientY;
+			didSwipe = false;
+		}
+
+		function onPointerMove(e: PointerEvent) {
+			// Suppress text selection once dragging starts
+			if (Math.abs(e.clientX - startX) > 5) {
+				e.preventDefault();
+			}
+		}
+
+		function onPointerUp(e: PointerEvent) {
+			const dx = e.clientX - startX;
+			const dy = e.clientY - startY;
+			if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+				didSwipe = true;
+				if (dx < 0) next();
+				else prev();
+			} else if (!didSwipe && Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+				// Tap/click: left half → prev, right half → next
+				const midpoint = (slideAreaEl as HTMLElement).clientWidth / 2;
+				if (e.clientX < midpoint) prev();
+				else next();
+			}
+		}
+
+		slideAreaEl.addEventListener('pointerdown', onPointerDown);
+		slideAreaEl.addEventListener('pointermove', onPointerMove);
+		slideAreaEl.addEventListener('pointerup', onPointerUp);
+		return () => {
+			slideAreaEl?.removeEventListener('pointerdown', onPointerDown);
+			slideAreaEl?.removeEventListener('pointermove', onPointerMove);
+			slideAreaEl?.removeEventListener('pointerup', onPointerUp);
+		};
+	});
 </script>
 
 <svelte:head>
@@ -95,7 +142,7 @@
 	</nav>
 
 	<!-- Slide area -->
-	<main class="slide-area" id="main-content">
+	<main class="slide-area" id="main-content" bind:this={slideAreaEl}>
 		{#if slides.length === 0}
 			<div class="loading-state">
 				<p>Loading slides…</p>
@@ -203,6 +250,8 @@
 		justify-content: center;
 		padding: 3rem 4rem;
 		overflow: hidden;
+		user-select: none;
+		cursor: pointer;
 	}
 
 	.loading-state {

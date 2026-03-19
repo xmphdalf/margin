@@ -13,6 +13,7 @@ let scrollProgress = $state(0); // 0–1
 let bookmarks = $state<Bookmark[]>([]);
 let rawMarkdown = $state('');
 let doc = $state<ParsedDoc | null>(null);
+let completedSections = $state<ReadonlySet<string>>(new Set());
 
 export const readerState = {
 	get mode() {
@@ -33,6 +34,9 @@ export const readerState = {
 	get doc() {
 		return doc;
 	},
+	get completedSections() {
+		return completedSections;
+	},
 
 	setMode(m: ReadingMode) {
 		mode = m;
@@ -46,6 +50,7 @@ export const readerState = {
 	setDoc(raw: string, parsed: ParsedDoc) {
 		rawMarkdown = raw;
 		doc = parsed;
+		completedSections = new Set(); // reset on new document
 	},
 	clearDoc() {
 		rawMarkdown = '';
@@ -62,5 +67,8 @@ export const readerState = {
 	},
 	setBookmarks(bs: Bookmark[]) {
 		bookmarks = bs;
+	},
+	markSectionComplete(id: string) {
+		completedSections = new Set([...completedSections, id]);
 	}
 };

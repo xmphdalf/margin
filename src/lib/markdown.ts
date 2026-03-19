@@ -26,7 +26,8 @@ import { toString } from 'mdast-util-to-string';
 import GithubSlugger from 'github-slugger';
 import { parse as parseYaml } from 'yaml';
 import type { Plugin } from 'unified';
-import type { Root as MdastRoot, Heading, Code, InlineCode } from 'mdast';
+import type { Root as MdastRoot, Heading, Code, Text, Parent } from 'mdast';
+import type { Root as HastRoot, Element } from 'hast';
 import type { VFile } from 'vfile';
 import type { ParsedDoc, TocEntry, Frontmatter } from './types.js';
 
@@ -58,6 +59,57 @@ function extractFrontmatterPlugin() {
 			} catch {
 				(file.data as Record<string, unknown>).frontmatter = {};
 			}
+		});
+	};
+}
+
+/**
+ * Add loading="lazy" decoding="async" to all <img> elements.
+ * Runs on the HAST tree after remark-rehype.
+ */
+function rehypeLazyImages(): (tree: HastRoot) => void {
+	return (tree: HastRoot) => {
+		visit(tree as Parameters<typeof visit>[0], 'element', (node: Element) => {
+			if (node.tagName === 'img') {
+				node.properties = node.properties ?? {};
+				node.properties['loading'] = 'lazy';
+				node.properties['decoding'] = 'async';
+			}
+		});
+	};
+}
+
+/**
+ * Transform [[Link Text]] wikilink syntax into cross-reference hint spans.
+ * Runs on the MDAST tree before remark-rehype.
+ */
+function remarkWikilinks(): (tree: MdastRoot) => void {
+	return (tree: MdastRoot) => {
+		visit(tree, 'text', (node: Text, index: number | undefined, parent: Parent | undefined) => {
+			if (!node.value.includes('[[') || !parent || index == null) return;
+
+			const parts = node.value.split(/(\[\[[^\]]+\]\])/);
+			if (parts.length === 1) return;
+
+			const newNodes = parts
+				.filter((p) => p.length > 0)
+				.map((part) => {
+					const match = /^\[\[([^\]]+)\]\]$/.exec(part);
+					if (match) {
+						const ref = match[1]
+							.replace(/&/g, '&amp;')
+							.replace(/"/g, '&quot;')
+							.replace(/</g, '&lt;')
+							.replace(/>/g, '&gt;');
+						return {
+							type: 'html' as const,
+							value: `<span class="wikilink" title="Cross-reference: ${ref}">${match[1]}</span>`
+						};
+					}
+					return { type: 'text' as const, value: part };
+				});
+
+			parent.children.splice(index, 1, ...(newNodes as MdastRoot['children']));
 		});
 	};
 }
@@ -127,12 +179,10 @@ export async function parseMarkdown(raw: string): Promise<ParsedDoc> {
 		.use(remarkSmartypants as Plugin)
 		.use(extractTocPlugin)
 		.use(extractFrontmatterPlugin)
+		.use(remarkWikilinks)
 		// Detection plugin — runs at MDAST stage, collects flags
 		.use(() => (tree: MdastRoot) => {
 			visit(tree, (node) => {
-				if (node.type === 'math' || node.type === 'inlineMath') {
-					// flag collected later via file.data
-				}
 				if (node.type === 'code') {
 					const lang = (node as Code).lang;
 					if (lang && !codeLangs.includes(lang)) codeLangs.push(lang);
@@ -147,6 +197,7 @@ export async function parseMarkdown(raw: string): Promise<ParsedDoc> {
 			content: { type: 'text', value: '#' }
 		})
 		.use(rehypeKatex)
+		.use(rehypeLazyImages as unknown as Plugin)
 		.use(rehypeStringify, { allowDangerousHtml: true });
 
 	const file = await processor.process(raw);
@@ -183,6 +234,7 @@ export async function parseMarkdown(raw: string): Promise<ParsedDoc> {
 				.use(remarkSmartypants as Plugin)
 				.use(extractTocPlugin)
 				.use(extractFrontmatterPlugin)
+				.use(remarkWikilinks)
 				.use(remarkRehype, { allowDangerousHtml: true })
 				.use(rehypeSlug)
 				.use(rehypeAutolinkHeadings, {
@@ -195,6 +247,7 @@ export async function parseMarkdown(raw: string): Promise<ParsedDoc> {
 					themes: { light: 'github-light', dark: 'vitesse-dark' },
 					defaultColor: false // CRITICAL: emit CSS vars, not hardcoded colors
 				})
+				.use(rehypeLazyImages as unknown as Plugin)
 				.use(rehypeStringify, { allowDangerousHtml: true });
 
 			const shikiFile = await shikiProcessor.process(raw);

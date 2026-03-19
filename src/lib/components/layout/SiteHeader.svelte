@@ -4,9 +4,10 @@
 
 	interface Props {
 		showHomeLink?: boolean;
+		tools?: import('svelte').Snippet;
 	}
 
-	let { showHomeLink = false }: Props = $props();
+	let { showHomeLink = false, tools }: Props = $props();
 </script>
 
 <header class="site-header">
@@ -23,6 +24,9 @@
 					</svg>
 					New document
 				</a>
+			{/if}
+			{#if tools}
+				{@render tools()}
 			{/if}
 			<ThemeToggle />
 		</div>

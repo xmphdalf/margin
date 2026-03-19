@@ -165,14 +165,14 @@ This is the complete product vision. Build in order of priority, but design for 
 
 ### Reading Modes
 - **Book Mode** — `max-width: 65ch`, large vertical padding, large font, pure reading focus
-- **Focus Mode** — zero UI chrome; `data-mode="focus"` on `<html>`, TOC/toolbar/header fade to `opacity: 0; pointer-events: none`. Exit via `Escape` or edge hover
+- **Focus Mode** — zero UI chrome; `data-mode="focus"` on the read shell, TOC/toolbar/header fade to `opacity: 0; pointer-events: none`. Mode bar dims to 20% opacity, reveals on hover. Exit via `Escape` or clicking the mode bar
 - **Study Mode** — TOC always visible on left, narrower content column, heading anchors always shown
 - **Story Mode** — chapter styling, drop caps (`::first-letter`), cinematic vertical pacing for prose/fiction
 
 ### Navigation
 - Dynamic table of contents extracted from Markdown AST (not DOM scraping)
-- Scroll-based section highlighting via IntersectionObserver
-- Smooth jump navigation with offset for fixed/floating headers
+- Scroll-based section highlighting via scroll listener (picks last heading above 30% viewport height; activates last heading when at page bottom)
+- Smooth jump navigation with offset for fixed/floating headers (`scroll-margin-top: 4.5rem`)
 - Keyboard shortcut `J`/`K` to jump to next/previous section
 
 ### Reading Intelligence
@@ -279,7 +279,7 @@ import rehypeShiki from '@shikijs/rehype';
 import rehypeStringify from 'rehype-stringify';
 ```
 
-Order: `remarkParse` → `remarkGfm` → `remarkFrontmatter` → `remarkMath` → `remarkSmartypants` → `[extractTocPlugin]` → `remarkRehype` → `rehypeSlug` → `rehypeAutolinkHeadings` → `rehypeKatex` → `rehypeShiki` → `rehypeStringify`
+Order: `remarkParse` → `remarkGfm` → `remarkFrontmatter` → `remarkMath` → `remarkSmartypants` → `[remarkWikilinks]` → `[extractTocPlugin]` → `remarkRehype` → `rehypeSlug` → `rehypeAutolinkHeadings` → `rehypeKatex` → `rehypeShiki` → `[rehypeLazyImages]` → `rehypeStringify`
 
 **Return shape:**
 ```ts
@@ -329,27 +329,30 @@ html.dark .shiki { background-color: var(--shiki-dark-bg) !important; }
 
 ### Scroll Spy (TOC Active State)
 
+Implemented as a scroll listener (not IntersectionObserver — IO fails on short sections that never fully enter the root margin window):
+
 ```ts
-// Inside onMount — never at module level
-const observer = new IntersectionObserver(
-  (entries) => {
-    // Handle multiple intersecting entries: pick topmost
-    entries.forEach(e => {
-      if (e.isIntersecting) intersecting.set(e.target.id, e);
-      else intersecting.delete(e.target.id);
-    });
-    const sorted = [...intersecting.values()]
-      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-    if (sorted.length > 0) activeId = sorted[0].target.id;
-  },
-  { rootMargin: '-40% 0px -55% 0px', threshold: 0 }
-);
-
-headings.forEach(h => observer.observe(h));
-
-// Return from onMount (or use onDestroy) — ALWAYS clean up
-return () => observer.disconnect();
+function updateActive() {
+  const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+  if (atBottom) {
+    readerState.setActiveHeading(headingIds[headingIds.length - 1]);
+    return;
+  }
+  const threshold = window.innerHeight * 0.3;
+  let active = headingIds[0];
+  for (const id of headingIds) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    if (el.getBoundingClientRect().top <= threshold) active = id;
+    else break;
+  }
+  if (active) readerState.setActiveHeading(active);
+}
+window.addEventListener('scroll', updateActive, { passive: true });
+return () => window.removeEventListener('scroll', updateActive);
 ```
+
+Section completion uses a separate `IntersectionObserver` with `rootMargin: '0px 0px -95% 0px'` — marks a heading complete when it exits through the top of the viewport.
 
 Active indicator: CSS `transition` only — no JS-driven animation.
 
@@ -363,17 +366,19 @@ Toggle via class on `<html>`:
 **Anti-Flash Init** — inline script in `app.html` `<head>`, runs synchronously before CSS paints:
 ```html
 <script>
-  const t = localStorage.getItem('margin:theme') ?? 'light';
+  var stored = localStorage.getItem('margin-theme');
+  var t = stored ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   if (t === 'dark') document.documentElement.classList.add('dark');
   if (t === 'sepia') document.documentElement.setAttribute('data-theme', 'sepia');
 </script>
 ```
+Falls back to `prefers-color-scheme` when no stored preference exists.
 
 Theme transition: `transition: background-color 400ms ease, color 400ms ease, border-color 400ms ease` on `*, *::before, *::after`. Suppress during page init with a `no-transitions` class removed after first paint.
 
-Persist via `$effect`:
+Persist via `$effect` in `AppShell.svelte`:
 ```ts
-$effect(() => { localStorage.setItem('margin:theme', theme); });
+$effect(() => { localStorage.setItem('margin-theme', theme); });
 ```
 
 ### TailwindCSS v4 Patterns
@@ -480,16 +485,16 @@ paths: { base: process.env.BASE_PATH ?? '' }
 ### LocalStorage Schema
 
 ```ts
-// Keys
-'margin:settings:v1'    // typography + display prefs
-'margin:theme'          // 'light' | 'dark' | 'sepia'
-'margin:mode'           // 'book' | 'focus' | 'study' | 'story'
-'margin:position:{hash}'  // { scrollY, headingId, savedAt } — expires 90d
-'margin:bookmarks'      // Bookmark[] — max 100, LRU eviction
+// Keys (all use hyphen separator, defined in src/lib/utils/storage.ts KEYS object)
+'margin-settings-v1'        // typography + display prefs (ReaderSettings)
+'margin-theme'              // 'light' | 'dark' | 'sepia'
+'margin-mode'               // 'book' | 'focus' | 'study' | 'story'
+'margin-position-{hash}'    // { scrollY, headingId, savedAt } — expires 90d, hash = djb2(rawMarkdown)
+'margin-bookmarks'          // Bookmark[] — max 100, LRU eviction
 
-// All reads/writes wrapped in try/catch
-// Always spread DEFAULT_SETTINGS as base to handle missing keys
-// Version schemas — migrate forward on schema change
+// All reads/writes wrapped in try/catch (Safari Private Browsing throws on setItem)
+// Always spread defaults as base to handle missing keys after schema change
+// Positions purged on load if savedAt > 90 days ago
 ```
 
 ### Mermaid Diagrams
@@ -501,14 +506,11 @@ No production-ready build-time plugin. Pattern:
 
 ### Presentation Mode
 
-Loaded as a lazy Svelte component — never in initial bundle:
-```svelte
-{#await import('$lib/Slideshow.svelte') then m}
-  <m.default {slides} />
-{/await}
-```
+Implemented as a dedicated SvelteKit route at `/present/+page.svelte` (not a lazy-loaded component). Navigation between reading and presentation uses the `{base}/present/` link in the reading toolbar.
 
-Slide parsing: split raw Markdown at `\n---\n`, process each chunk independently through the pipeline. Store as `Array<{ html: string, notes: string }>`. Notes extracted from `<!-- notes: ... -->` comments.
+Slide parsing: split raw Markdown at `\n---\n`, process each chunk independently through the pipeline on `onMount`. Store as `Array<{ html: string, notes: string }>`. Notes extracted from `<!-- notes: ... -->` comments.
+
+Navigation: keyboard (arrow keys / space), pointer swipe (left/right), and tap-to-navigate (left half = prev, right half = next). Text selection suppressed during swipe. Fullscreen via `document.requestFullscreen()`.
 
 ---
 

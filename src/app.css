@@ -87,7 +87,7 @@ body {
 	margin-top: 2em;
 	margin-bottom: 0.5em;
 	color: var(--color-ink);
-	scroll-margin-top: 2rem;
+	scroll-margin-top: 4.5rem;
 }
 
 .prose h1 { font-size: 2em; }
@@ -246,6 +246,63 @@ body {
 	opacity: 0;
 	pointer-events: none;
 	transition: opacity 400ms ease;
+}
+
+/* ─── Wikilinks — cross-reference hints ─── */
+.wikilink {
+	border-bottom: 1px dashed var(--color-accent);
+	color: var(--color-ink);
+	cursor: help;
+	transition: color 200ms ease;
+}
+
+.wikilink:hover {
+	color: var(--color-accent);
+}
+
+/* ─── Story mode: cinematic prose styling ─── */
+[data-mode='story'] .prose > h1,
+[data-mode='story'] .prose > h2 {
+	font-size: 2.25em;
+	margin-top: 4em;
+	margin-bottom: 1.25em;
+	font-weight: 500;
+	letter-spacing: -0.025em;
+}
+
+/* Drop cap on first paragraph after a heading */
+[data-mode='story'] .prose h1 + p::first-letter,
+[data-mode='story'] .prose h2 + p::first-letter {
+	font-family: var(--font-serif);
+	font-size: 3.5em;
+	font-weight: 700;
+	line-height: 0.8;
+	float: left;
+	margin-right: 0.08em;
+	margin-top: 0.06em;
+	color: var(--color-ink);
+}
+
+/* Cinematic paragraph spacing + indent */
+[data-mode='story'] .prose p {
+	margin-bottom: 1.75em;
+	text-indent: 1.5em;
+}
+
+/* No indent on first paragraph after headings (drop cap handles it) */
+[data-mode='story'] .prose h1 + p,
+[data-mode='story'] .prose h2 + p,
+[data-mode='story'] .prose h3 + p {
+	text-indent: 0;
+}
+
+/* Blockquote as literary aside */
+[data-mode='story'] .prose blockquote {
+	font-style: italic;
+	border-left: none;
+	text-align: center;
+	padding: 1em 2em;
+	color: var(--color-ink-muted);
 }
 
 /* ─── Screen reader utility ─── */

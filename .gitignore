@@ -18,6 +18,9 @@ Thumbs.db
 .vscode/settings.json
 .idea/
 
+# Claude Code local session data
+.claude/
+
 # Logs
 *.log
 npm-debug.log*

@@ -28,12 +28,14 @@ Runs entirely in the browser. No backend, no accounts, no tracking. Deployable o
 - Fetch from any public URL — GitHub blob links auto-converted to raw
 
 **Reading**
-- Three reading modes — Book (prose column), Focus (zero chrome), Study (persistent TOC sidebar)
-- Three themes — Light, Sepia, Dark — full coordinated oklch palettes, zero flash on load, cycle with one click
-- Dynamic table of contents extracted from the Markdown AST, with scroll-spy active heading
+- Four reading modes — Book (prose column), Focus (zero chrome), Study (persistent TOC sidebar), Story (drop caps + cinematic spacing for long-form prose)
+- Three themes — Light, Sepia, Dark — full coordinated oklch palettes, zero flash on load, respects `prefers-color-scheme` as default
+- Dynamic table of contents extracted from the Markdown AST, with scroll-spy active heading and section completion tracking
 - Scroll progress bar — CSS Scroll-Driven Animations (Chrome/Safari), JS fallback for Firefox
-- Estimated reading time shown per document
+- Estimated reading time — `N min read` near the title, updates to `N min left` as you scroll
+- Per-document reading position — restored on return visits, expires after 90 days
 - Bookmarks — per-document, up to 100, LRU eviction, restored on next visit
+- `J` / `K` keyboard shortcuts to jump to the next / previous section
 - Theme, reading mode, and typography settings all persisted to localStorage
 
 **Typography**
@@ -49,11 +51,17 @@ Runs entirely in the browser. No backend, no accounts, no tracking. Deployable o
 - Syntax highlighting via Shiki v1 — dual themes (light + dark via CSS variables), lazy-loaded
 - Mermaid diagrams — lazy-loaded, never in the initial bundle
 - Smart typography — curly quotes, em-dashes, ellipses via remark-smartypants
+- `[[Wikilinks]]` rendered as cross-reference hints
+- Lazy image loading — `loading="lazy"` on all images via rehype plugin
 
 **Presentation mode**
 - Split slides on `---` horizontal rules
 - Keyboard arrow navigation and fullscreen
+- Touch/pointer swipe to advance; tap left half to go back, right half to advance
 - Speaker notes via `<!-- notes: ... -->` comment blocks
+
+**Export**
+- Download the document as a self-contained HTML file — inline CSS matching the current theme and typography, no external dependencies
 
 ---
 

@@ -1,22 +1,12 @@
 <script lang="ts">
 	import { readerState } from '$lib/state/reader.svelte.js';
 	import { onMount } from 'svelte';
-	import { getScrollProgress } from '$lib/utils/scroll.js';
 
 	// Check if CSS scroll-driven animations are supported
 	let useCSS = $state(false);
 
 	onMount(() => {
 		useCSS = CSS.supports('animation-timeline', 'scroll()');
-
-		if (!useCSS) {
-			// JS fallback for Firefox
-			const update = () => {
-				readerState.setScrollProgress(getScrollProgress());
-			};
-			window.addEventListener('scroll', update, { passive: true });
-			return () => window.removeEventListener('scroll', update);
-		}
 	});
 </script>
 

@@ -13,7 +13,8 @@
 		<script>
 			(function () {
 				try {
-					var t = localStorage.getItem('margin-theme') || 'light';
+					var stored = localStorage.getItem('margin-theme');
+					var t = stored ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 					document.documentElement.setAttribute('data-theme', t);
 					if (t === 'dark') document.documentElement.classList.add('dark');
 					// Suppress transitions during initial paint

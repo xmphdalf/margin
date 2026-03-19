@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { readerState } from '$lib/state/reader.svelte.js';
+	import { settingsState } from '$lib/state/settings.svelte.js';
+	import { themeState } from '$lib/state/theme.svelte.js';
+	import { base } from '$app/paths';
 	import SiteHeader from '$lib/components/layout/SiteHeader.svelte';
 	import ProgressBar from '$lib/components/reader/ProgressBar.svelte';
 	import ReaderView from '$lib/components/reader/ReaderView.svelte';
@@ -24,6 +27,12 @@
 	const pageTitle = $derived(
 		doc?.frontmatter?.title ? `${doc.frontmatter.title} — Margin` : 'Reading — Margin'
 	);
+
+	async function handleExport() {
+		if (!doc) return;
+		const { exportDocument } = await import('$lib/export.js');
+		await exportDocument(doc, settingsState.value, themeState.current);
+	}
 </script>
 
 <svelte:head>
@@ -34,11 +43,29 @@
 	<!-- Progress bar — fixed at top -->
 	<ProgressBar />
 
-	<!-- Site header with back link + reading controls -->
-	<div class="site-header">
-		<SiteHeader showHomeLink={true} />
-		<!-- Floating action buttons in header -->
-		<div class="header-extras" aria-label="Reading tools">
+	<!-- Site header — SiteHeader handles the left side; tool buttons slot into header via portal-like approach -->
+	<SiteHeader showHomeLink={true}>
+		{#snippet tools()}
+			<a href="{base}/present/" class="tool-btn" title="Present" aria-label="Presentation mode">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<rect x="2" y="3" width="20" height="14" rx="2"/>
+					<line x1="8" y1="21" x2="16" y2="21"/>
+					<line x1="12" y1="17" x2="12" y2="21"/>
+				</svg>
+			</a>
+			<button
+				onclick={handleExport}
+				aria-label="Export as HTML"
+				class="tool-btn"
+				title="Export as HTML"
+				disabled={!doc}
+			>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+					<polyline points="7 10 12 15 17 10"/>
+					<line x1="12" y1="15" x2="12" y2="3"/>
+				</svg>
+			</button>
 			<button
 				onclick={() => { showSettings = !showSettings; showBookmarks = false; }}
 				aria-label="Typography settings"
@@ -69,8 +96,8 @@
 					</span>
 				{/if}
 			</button>
-		</div>
-	</div>
+		{/snippet}
+	</SiteHeader>
 
 	<!-- Main reading area -->
 	{#if doc}
@@ -90,20 +117,6 @@
 		min-height: 100vh;
 		background-color: var(--color-surface);
 		transition: background-color 400ms ease;
-	}
-
-	.site-header {
-		position: relative;
-	}
-
-	.header-extras {
-		position: absolute;
-		top: 50%;
-		right: 4.5rem; /* beside theme toggle */
-		transform: translateY(-50%);
-		display: flex;
-		gap: 0.25rem;
-		align-items: center;
 	}
 
 	.tool-btn {
@@ -154,8 +167,7 @@
 	}
 
 	/* Focus mode: hide all chrome */
-	[data-mode='focus'] :global(.site-header),
-	[data-mode='focus'] .header-extras {
+	[data-mode='focus'] :global(.site-header) {
 		opacity: 0;
 		pointer-events: none;
 		transition: opacity 400ms ease;

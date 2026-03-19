@@ -9,8 +9,11 @@
 	import { themeState } from '$lib/state/theme.svelte.js';
 	import { settingsState, DEFAULT_SETTINGS, MEASURE_MAP } from '$lib/state/settings.svelte.js';
 	import { readerState } from '$lib/state/reader.svelte.js';
-	import { storageGet, storageSet, KEYS } from '$lib/utils/storage.js';
-	import type { Theme, ReaderSettings, Bookmark, ReadingMode } from '$lib/types.js';
+	import { analyticsState } from '$lib/state/analytics.svelte.js';
+	import { storageGet, storageSet, KEYS, hashDoc, purgeExpiredPositions } from '$lib/utils/storage.js';
+	import { getScrollProgress } from '$lib/utils/scroll.js';
+	import type { Theme, ReaderSettings, Bookmark, ReadingMode, ReadingPosition } from '$lib/types.js';
+	import type { ReadingSession } from '$lib/state/analytics.svelte.js';
 
 	interface Props {
 		children?: import('svelte').Snippet;
@@ -20,8 +23,11 @@
 
 	// ── Hydrate from localStorage on mount ──────────────────────────────────
 	onMount(() => {
-		// 1. Theme (already partially applied by anti-flash script in app.html)
-		const savedTheme = storageGet<Theme>(KEYS.theme, 'light');
+		// 1. Theme — fall back to system preference when no stored value exists
+		const systemTheme: Theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+			? 'dark'
+			: 'light';
+		const savedTheme = storageGet<Theme | null>(KEYS.theme, null) ?? systemTheme;
 		themeState.set(savedTheme);
 
 		// 2. Settings
@@ -36,12 +42,75 @@
 		const savedMode = storageGet<ReadingMode>(KEYS.mode, 'book');
 		readerState.setMode(savedMode);
 
-		// 5. Remove transition suppression class after first paint
+		// 5. Restore reading position for current document (if any)
+		const raw = readerState.rawMarkdown;
+		if (raw) {
+			const hash = hashDoc(raw);
+			const pos = storageGet<ReadingPosition | null>(KEYS.position(hash), null);
+			if (pos && Date.now() - pos.savedAt < 90 * 24 * 60 * 60 * 1000) {
+				requestAnimationFrame(() => {
+					window.scrollTo({ top: pos.scrollY, behavior: 'instant' });
+				});
+			}
+		}
+
+		// 6. Purge expired positions at idle
+		if ('requestIdleCallback' in window) {
+			requestIdleCallback(purgeExpiredPositions);
+		} else {
+			setTimeout(purgeExpiredPositions, 2000);
+		}
+
+		// 7. Track scroll progress + save reading position on scroll
+		let saveTimer: ReturnType<typeof setTimeout>;
+		function handleScroll() {
+			// Always update scroll progress in state (for "N min left", etc.)
+			readerState.setScrollProgress(getScrollProgress());
+
+			// Debounced position persistence
+			clearTimeout(saveTimer);
+			saveTimer = setTimeout(() => {
+				const currentRaw = readerState.rawMarkdown;
+				if (!currentRaw) return;
+				const pos: ReadingPosition = {
+					scrollY: window.scrollY,
+					headingId: readerState.activeHeading,
+					savedAt: Date.now()
+				};
+				storageSet(KEYS.position(hashDoc(currentRaw)), pos);
+			}, 1000);
+		}
+		window.addEventListener('scroll', handleScroll, { passive: true });
+
+		// 8. Analytics — load saved sessions; start/end sessions on doc changes
+		const savedSessions = storageGet<ReadingSession[]>('margin-analytics-v1', []);
+		analyticsState.setSessions(savedSessions);
+
+		// Start a session if a doc is already loaded
+		const currentRawForAnalytics = readerState.rawMarkdown;
+		if (currentRawForAnalytics) {
+			analyticsState.startSession(hashDoc(currentRawForAnalytics));
+		}
+
+		// End session when page hides (tab switch, close)
+		function handlePageHide() {
+			analyticsState.endSession();
+			storageSet('margin-analytics-v1', analyticsState.sessions);
+		}
+		window.addEventListener('pagehide', handlePageHide);
+
+		// 9. Remove no-transitions class after first paint
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
 				document.documentElement.classList.remove('no-transitions');
 			});
 		});
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+			window.removeEventListener('pagehide', handlePageHide);
+			clearTimeout(saveTimer);
+		};
 	});
 
 	// ── Persist theme changes ────────────────────────────────────────────────
@@ -69,6 +138,13 @@
 	// ── Persist reading mode changes ─────────────────────────────────────────
 	$effect(() => {
 		storageSet(KEYS.mode, readerState.mode);
+	});
+
+	// ── Persist analytics sessions ───────────────────────────────────────────
+	$effect(() => {
+		if (analyticsState.sessions.length > 0) {
+			storageSet('margin-analytics-v1', analyticsState.sessions);
+		}
 	});
 
 	// ── Computed CSS vars from settings ─────────────────────────────────────
