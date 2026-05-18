@@ -64,8 +64,13 @@
 		// 7. Track scroll progress + save reading position on scroll
 		let saveTimer: ReturnType<typeof setTimeout>;
 		function handleScroll() {
+			const progress = getScrollProgress();
 			// Always update scroll progress in state (for "N min left", etc.)
-			readerState.setScrollProgress(getScrollProgress());
+			readerState.setScrollProgress(progress);
+
+			// Update analytics progress
+			const wordCount = readerState.doc?.wordCount ?? 0;
+			analyticsState.updateProgress(progress, wordCount, readerState.completedSections.size);
 
 			// Debounced position persistence
 			clearTimeout(saveTimer);
@@ -82,15 +87,9 @@
 		}
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
-		// 8. Analytics — load saved sessions; start/end sessions on doc changes
+		// 8. Analytics — load saved sessions; session lifecycle managed by $effect below
 		const savedSessions = storageGet<ReadingSession[]>('margin-analytics-v1', []);
 		analyticsState.setSessions(savedSessions);
-
-		// Start a session if a doc is already loaded
-		const currentRawForAnalytics = readerState.rawMarkdown;
-		if (currentRawForAnalytics) {
-			analyticsState.startSession(hashDoc(currentRawForAnalytics));
-		}
 
 		// End session when page hides (tab switch, close)
 		function handlePageHide() {
@@ -145,6 +144,20 @@
 		if (analyticsState.sessions.length > 0) {
 			storageSet('margin-analytics-v1', analyticsState.sessions);
 		}
+	});
+
+	// ── Session lifecycle: start/end when the active document changes ────────
+	let _prevDocHash = '';
+	$effect(() => {
+		const raw = readerState.rawMarkdown; // tracked
+		const hash = raw ? hashDoc(raw) : '';
+		if (hash === _prevDocHash) return;
+		if (_prevDocHash) {
+			analyticsState.endSession();
+			storageSet('margin-analytics-v1', analyticsState.sessions);
+		}
+		_prevDocHash = hash;
+		if (hash) analyticsState.startSession(hash);
 	});
 
 	// ── Computed CSS vars from settings ─────────────────────────────────────

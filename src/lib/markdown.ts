@@ -262,6 +262,7 @@ export async function parseMarkdown(raw: string): Promise<ParsedDoc> {
 		html,
 		toc: data.toc ?? [],
 		readingTime,
+		wordCount,
 		frontmatter: data.frontmatter ?? {},
 		hasMath,
 		hasCode

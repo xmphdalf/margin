@@ -19,6 +19,48 @@ _Changes staged here are merged to a version section on each release._
 
 ---
 
+## [0.1.5] — 2026-05-18
+
+### Added
+
+- **Bookmark creation** — a bookmark button in the reading toolbar (left of the
+  bookmark list toggle) saves the current active section as a bookmark.
+  Disabled when no heading is active. Shows a green checkmark for 1.5 s after
+  saving as a transient confirmation. Uses `crypto.randomUUID()` for IDs.
+
+- **Reading analytics panel** — a new bar-chart icon button in the reading
+  toolbar opens an Analytics panel (same slide-in pattern as Settings and
+  Bookmarks). Displays current-session stats (time reading, words read, sections
+  completed) and all-time totals (session count, total time, total words).
+  Closes automatically when entering Focus mode.
+
+- **Mermaid theme sync** — Mermaid diagrams now re-render when the app theme
+  changes. Mapping: Light → `default`, Sepia → `neutral`, Dark → `dark`.
+  Diagram source is stored after initial render so containers are updated
+  in-place on every theme switch without touching the surrounding DOM.
+
+### Fixed
+
+- **KaTeX CSS no longer loaded from CDN** — replaced the runtime-created
+  `<link href="cdn.jsdelivr.net/...">` with a dynamic `import('$lib/katex-css.js')`.
+  Vite bundles KaTeX CSS into a separate lazy chunk (`katex-css.*.css`) served
+  from the app itself. Eliminates the external network dependency and makes
+  math rendering fully offline-capable after first load. `katex` added as a
+  direct `devDependency` so the import is not fragile to `rehype-katex` version
+  bumps.
+
+- **Analytics session lifecycle** — `analyticsState.updateProgress()` was never
+  called (all sessions recorded 0 words and 0 time). Fixed by wiring
+  `updateProgress` into the scroll handler in `AppShell`. Session start/end is
+  now driven by a `$effect` watching `readerState.rawMarkdown`, correctly
+  capturing the home-page → `/read/` navigation that `onMount` missed.
+
+- **`wordCount` added to `ParsedDoc`** — the parsed document now exposes the
+  raw word count (already computed in the pipeline) so analytics can report
+  precise words-read figures rather than back-calculating from `readingTime`.
+
+---
+
 ## [0.1.4] — 2026-03-19
 
 ### Added
@@ -235,7 +277,10 @@ decision is in place so no rewrites are needed as features land.
 
 ---
 
-[Unreleased]: https://github.com/xmphdalf/margin/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/xmphdalf/margin/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/xmphdalf/margin/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/xmphdalf/margin/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/xmphdalf/margin/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/xmphdalf/margin/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/xmphdalf/margin/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/xmphdalf/margin/releases/tag/v0.1.0

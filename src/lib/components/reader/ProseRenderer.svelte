@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { themeState } from '$lib/state/theme.svelte.js';
 	import type { ParsedDoc } from '$lib/types.js';
 
 	interface Props {
@@ -8,38 +9,61 @@
 
 	let { doc }: Props = $props();
 
-	// Lazy-load KaTeX CSS only when document contains math
+	// Lazy-load KaTeX CSS only when document contains math (self-hosted via Vite chunk)
 	onMount(() => {
 		if (!doc.hasMath) return;
-
-		const id = 'katex-css';
-		if (document.getElementById(id)) return; // already loaded
-
-		const link = document.createElement('link');
-		link.id = id;
-		link.rel = 'stylesheet';
-		link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css';
-		document.head.appendChild(link);
+		import('$lib/katex-css.js');
 	});
 
-	// Lazy-load and initialize Mermaid for diagram blocks
+	// Mermaid — lazy-loaded, theme-aware, re-renders on app theme change.
+	// Plain let vars (not $state) so the $effect below only tracks themeState.current.
+	let mermaidRef: Awaited<typeof import('mermaid')>['default'] | null = null;
+	let diagramData: Array<{ container: HTMLDivElement; source: string }> = [];
+
+	function getMermaidTheme(t: string): 'default' | 'dark' | 'neutral' {
+		if (t === 'dark') return 'dark';
+		if (t === 'sepia') return 'neutral';
+		return 'default';
+	}
+
 	onMount(async () => {
-		const diagrams = document.querySelectorAll('code.language-mermaid');
-		if (diagrams.length === 0) return;
+		const codeEls = [...document.querySelectorAll('code.language-mermaid')];
+		if (codeEls.length === 0) return;
 
 		const { default: mermaid } = await import('mermaid');
-		mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+		mermaidRef = mermaid;
+		mermaid.initialize({ startOnLoad: false, theme: getMermaidTheme(themeState.current) });
 
-		diagrams.forEach(async (el) => {
+		for (const el of codeEls) {
 			const parent = el.parentElement;
-			if (!parent) return;
+			if (!parent) continue;
 			const code = el.textContent ?? '';
-			const { svg } = await mermaid.render(`mermaid-${Math.random().toString(36).slice(2)}`, code);
-			const wrapper = document.createElement('div');
-			wrapper.className = 'mermaid-diagram';
-			wrapper.innerHTML = svg;
-			parent.replaceWith(wrapper);
-		});
+			const container = document.createElement('div');
+			container.className = 'mermaid-diagram';
+			try {
+				const { svg } = await mermaid.render(`mermaid-${Math.random().toString(36).slice(2)}`, code);
+				container.innerHTML = svg;
+				parent.replaceWith(container);
+				diagramData.push({ container, source: code });
+			} catch {
+				// Invalid diagram — leave as plain code block
+			}
+		}
+	});
+
+	// Re-render diagrams when the app theme changes
+	$effect(() => {
+		const theme = themeState.current; // tracked dependency
+		if (!mermaidRef || diagramData.length === 0) return;
+		mermaidRef.initialize({ startOnLoad: false, theme: getMermaidTheme(theme) });
+		for (const { container, source } of diagramData) {
+			mermaidRef
+				.render(`mermaid-${Math.random().toString(36).slice(2)}`, source)
+				.then(({ svg }) => {
+					container.innerHTML = svg;
+				})
+				.catch(() => {});
+		}
 	});
 </script>
 

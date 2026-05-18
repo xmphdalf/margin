@@ -8,6 +8,7 @@
 	import ReaderView from '$lib/components/reader/ReaderView.svelte';
 	import ReadingModeBar from '$lib/components/reader/ReadingModeBar.svelte';
 	import BookmarkList from '$lib/components/reader/BookmarkList.svelte';
+	import AnalyticsPanel from '$lib/components/reader/AnalyticsPanel.svelte';
 	import TypographyControls from '$lib/components/settings/TypographyControls.svelte';
 	import ThemeToggle from '$lib/components/ui/ThemeToggle.svelte';
 
@@ -15,14 +16,32 @@
 
 	let showBookmarks = $state(false);
 	let showSettings = $state(false);
+	let showAnalytics = $state(false);
+	let bookmarkSaved = $state(false);
 
 	// Close panels when focus mode is active
 	$effect(() => {
 		if (readerState.mode === 'focus') {
 			showBookmarks = false;
 			showSettings = false;
+			showAnalytics = false;
 		}
 	});
+
+	function addBookmark() {
+		const headingId = readerState.activeHeading;
+		if (!headingId || !doc) return;
+		const entry = doc.toc.find((e) => e.id === headingId);
+		if (!entry) return;
+		readerState.addBookmark({
+			id: crypto.randomUUID(),
+			headingId,
+			headingText: entry.text,
+			createdAt: Date.now()
+		});
+		bookmarkSaved = true;
+		setTimeout(() => (bookmarkSaved = false), 1500);
+	}
 
 	const pageTitle = $derived(
 		doc?.frontmatter?.title ? `${doc.frontmatter.title} — Margin` : 'Reading — Margin'
@@ -67,7 +86,21 @@
 				</svg>
 			</button>
 			<button
-				onclick={() => { showSettings = !showSettings; showBookmarks = false; }}
+				onclick={() => { showAnalytics = !showAnalytics; showSettings = false; showBookmarks = false; }}
+				aria-label="Reading analytics"
+				aria-pressed={showAnalytics}
+				class="tool-btn"
+				class:active={showAnalytics}
+				title="Reading analytics"
+			>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<line x1="18" y1="20" x2="18" y2="10"/>
+					<line x1="12" y1="20" x2="12" y2="4"/>
+					<line x1="6" y1="20" x2="6" y2="14"/>
+				</svg>
+			</button>
+			<button
+				onclick={() => { showSettings = !showSettings; showBookmarks = false; showAnalytics = false; }}
 				aria-label="Typography settings"
 				aria-pressed={showSettings}
 				class="tool-btn"
@@ -80,7 +113,26 @@
 				</svg>
 			</button>
 			<button
-				onclick={() => { showBookmarks = !showBookmarks; showSettings = false; }}
+				onclick={addBookmark}
+				aria-label={bookmarkSaved ? 'Bookmark saved' : 'Bookmark current section'}
+				class="tool-btn"
+				class:saved={bookmarkSaved}
+				title="Bookmark current section"
+				disabled={!doc || !readerState.activeHeading}
+			>
+				{#if bookmarkSaved}
+					<!-- Checkmark — transient saved confirmation -->
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<polyline points="20 6 9 17 4 12"/>
+					</svg>
+				{:else}
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+					</svg>
+				{/if}
+			</button>
+			<button
+				onclick={() => { showBookmarks = !showBookmarks; showSettings = false; showAnalytics = false; }}
 				aria-label="Bookmarks"
 				aria-pressed={showBookmarks}
 				class="tool-btn"
@@ -110,6 +162,7 @@
 	<!-- Side panels -->
 	<TypographyControls open={showSettings} onClose={() => (showSettings = false)} />
 	<BookmarkList open={showBookmarks} onClose={() => (showBookmarks = false)} />
+	<AnalyticsPanel open={showAnalytics} onClose={() => (showAnalytics = false)} />
 </div>
 
 <style>
@@ -142,6 +195,10 @@
 	.tool-btn.active {
 		color: var(--color-accent);
 		background-color: var(--color-surface-alt);
+	}
+
+	.tool-btn.saved {
+		color: oklch(0.55 0.15 145);
 	}
 
 	.tool-btn:focus-visible {

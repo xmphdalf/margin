@@ -22,6 +22,7 @@ export interface ParsedDoc {
 	toc: TocEntry[];
 	/** Math.ceil(wordCount / 238) */
 	readingTime: number;
+	wordCount: number;
 	frontmatter: Frontmatter;
 	hasMath: boolean;
 	hasCode: boolean;
