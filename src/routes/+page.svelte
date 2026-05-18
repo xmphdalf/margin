@@ -7,6 +7,7 @@
 	import MarkdownInput from '$lib/components/input/MarkdownInput.svelte';
 
 	let error = $state('');
+	let showModeDropdown = $state(false);
 
 	async function handleSubmit(raw: string) {
 		error = '';
@@ -18,6 +19,17 @@
 			error = e instanceof Error ? e.message : 'Failed to parse document.';
 		}
 	}
+
+	$effect(() => {
+		if (!showModeDropdown) return;
+		function onOutsideClick(e: MouseEvent) {
+			if (!(e.target as Element).closest('.mode-selector')) {
+				showModeDropdown = false;
+			}
+		}
+		document.addEventListener('click', onOutsideClick);
+		return () => document.removeEventListener('click', onOutsideClick);
+	});
 </script>
 
 <svelte:head>
@@ -30,7 +42,40 @@
 <main class="home-main" id="main-content">
 	<div class="home-hero">
 		<h1 class="hero-title">margin</h1>
-		<p class="hero-sub">A quiet place to read Markdown.</p>
+		<div class="hero-sub">
+			A quiet place to read
+			<span class="mode-selector">
+				<button
+					class="mode-trigger"
+					class:open={showModeDropdown}
+					onclick={(e) => { e.stopPropagation(); showModeDropdown = !showModeDropdown; }}
+					aria-haspopup="true"
+					aria-expanded={showModeDropdown}
+				>
+					<span><span class="md-cap">M</span>ark<span class="md-cap">D</span>own</span>
+					<svg class="trigger-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<polyline points="6 9 12 15 18 9"/>
+					</svg>
+				</button>
+				{#if showModeDropdown}
+					<div class="mode-dropdown">
+						<button
+							class="mode-option mode-option--active"
+							onclick={() => { showModeDropdown = false; }}
+						>
+							<span class="option-name option-name--serif"><span class="md-cap">M</span>ark<span class="md-cap">D</span>own</span>
+							<span class="option-desc">Read prose, essays &amp; long-form notes</span>
+						</button>
+						<div class="option-rule" role="separator"></div>
+						<div class="mode-option mode-option--soon" aria-disabled="true">
+							<span class="option-name option-name--mono">git diff</span>
+							<span class="option-desc">Review code changes, beautifully</span>
+							<span class="soon-note">— coming soon</span>
+						</div>
+					</div>
+				{/if}
+			</span>.
+		</div>
 	</div>
 
 	<div class="input-wrap">
@@ -69,6 +114,156 @@
 		font-size: 1rem;
 		color: var(--color-ink-muted);
 		margin: 0;
+		display: flex;
+		align-items: baseline;
+		gap: 0.3em;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
+
+	/* ── Mode selector (trigger + dropdown anchor) ── */
+	.mode-selector {
+		position: relative;
+		display: inline-flex;
+	}
+
+	.mode-trigger {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.2em;
+		background: none;
+		border: none;
+		border-bottom: 1px dashed var(--color-accent);
+		padding: 0 0 1px;
+		font-size: inherit;
+		font-family: var(--font-serif);
+		font-style: italic;
+		color: var(--color-ink-muted);
+		cursor: pointer;
+		transition: color 200ms ease;
+		line-height: inherit;
+	}
+
+	.mode-trigger:hover,
+	.mode-trigger.open {
+		color: var(--color-ink);
+	}
+
+	.mode-trigger:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 3px;
+		border-radius: 2px;
+	}
+
+	.md-cap {
+		color: var(--color-accent);
+	}
+
+	.trigger-chevron {
+		color: var(--color-accent);
+		transition: transform 300ms ease;
+		flex-shrink: 0;
+	}
+
+	.mode-trigger.open .trigger-chevron {
+		transform: rotate(180deg);
+	}
+
+	/* ── Dropdown card ── */
+	.mode-dropdown {
+		position: absolute;
+		top: calc(100% + 0.875rem);
+		left: 50%;
+		transform: translateX(-50%);
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 20px;
+		padding: 0.5rem;
+		box-shadow:
+			0 8px 32px oklch(0 0 0 / 0.1),
+			0 2px 8px oklch(0 0 0 / 0.06);
+		min-width: 300px;
+		z-index: 60;
+		animation: dropdown-in 220ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition: background-color 400ms ease, border-color 400ms ease;
+	}
+
+	@keyframes dropdown-in {
+		from {
+			opacity: 0;
+			transform: translateX(-50%) translateY(-8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(-50%) translateY(0);
+		}
+	}
+
+	.mode-option {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 0.875rem 1.125rem;
+		border-radius: 14px;
+		width: 100%;
+		border: none;
+		background: transparent;
+		text-align: left;
+		transition: background-color 200ms ease;
+	}
+
+	.mode-option--active {
+		background-color: var(--color-surface-alt);
+		cursor: pointer;
+	}
+
+	.mode-option--active:hover {
+		background-color: var(--color-surface-alt);
+	}
+
+	.mode-option--soon {
+		opacity: 0.55;
+		cursor: default;
+	}
+
+	.option-name {
+		font-size: 1.0625rem;
+		font-weight: 500;
+		color: var(--color-ink);
+		line-height: 1.2;
+	}
+
+	.option-name--serif {
+		font-family: var(--font-serif);
+		font-style: italic;
+	}
+
+	.option-name--mono {
+		font-family: var(--font-mono);
+		font-size: 0.9375rem;
+		font-weight: 400;
+		font-style: normal;
+	}
+
+	.option-desc {
+		font-size: 0.8125rem;
+		color: var(--color-ink-muted);
+		line-height: 1.45;
+	}
+
+	.soon-note {
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: 0.8125rem;
+		color: var(--color-ink-muted);
+		opacity: 0.7;
+	}
+
+	.option-rule {
+		height: 1px;
+		background-color: var(--color-border);
+		margin: 0.25rem 0.5rem;
+		transition: background-color 400ms ease;
 	}
 
 	.input-wrap {
