@@ -119,6 +119,29 @@ hr { border: none; border-top: 1px solid ${border}; margin: 2em 0; }
 `;
 }
 
+export async function printDocument(doc: ParsedDoc, settings: ReaderSettings, theme: Theme): Promise<void> {
+	const title = (doc.frontmatter.title as string | undefined) ?? 'Document';
+	const css = buildCSS(settings, theme);
+	const fullHtml = `<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${escapeHtml(title)}</title>
+  <style>${css}</style>
+</head><body>
+  <main>${doc.html}</main>
+  <script>window.onload = () => window.print();<\/script>
+</body></html>`;
+	const win = window.open('', '_blank');
+	if (!win) return;
+	win.document.write(fullHtml);
+	win.document.close();
+}
+
+export async function copyToClipboard(raw: string): Promise<void> {
+	await navigator.clipboard.writeText(raw);
+}
+
 export async function exportDocument(doc: ParsedDoc, settings: ReaderSettings, theme: Theme): Promise<void> {
 	const title = (doc.frontmatter.title as string | undefined) ?? 'Document';
 	const css = buildCSS(settings, theme);

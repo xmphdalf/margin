@@ -35,6 +35,7 @@ export const KEYS = {
 	settings: 'margin-settings-v1',
 	bookmarks: 'margin-bookmarks',
 	mode: 'margin-mode',
+	content: 'margin-content-v1',
 	position: (hash: string) => `margin-position-${hash}`
 } satisfies Record<string, string | ((hash: string) => string)>;
 

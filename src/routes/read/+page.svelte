@@ -17,6 +17,7 @@
 	let showBookmarks = $state(false);
 	let showSettings = $state(false);
 	let showAnalytics = $state(false);
+	let showExportMenu = $state(false);
 	let bookmarkSaved = $state(false);
 
 	// Close panels when focus mode is active
@@ -25,6 +26,7 @@
 			showBookmarks = false;
 			showSettings = false;
 			showAnalytics = false;
+			showExportMenu = false;
 		}
 	});
 
@@ -47,10 +49,26 @@
 		doc?.frontmatter?.title ? `${doc.frontmatter.title} — Margin` : 'Reading — Margin'
 	);
 
-	async function handleExport() {
+	async function handleExportHtml() {
 		if (!doc) return;
+		showExportMenu = false;
 		const { exportDocument } = await import('$lib/export.js');
 		await exportDocument(doc, settingsState.value, themeState.current);
+	}
+
+	async function handlePrint() {
+		if (!doc) return;
+		showExportMenu = false;
+		const { printDocument } = await import('$lib/export.js');
+		await printDocument(doc, settingsState.value, themeState.current);
+	}
+
+	async function handleCopy() {
+		const raw = readerState.rawMarkdown;
+		if (!raw) return;
+		showExportMenu = false;
+		const { copyToClipboard } = await import('$lib/export.js');
+		await copyToClipboard(raw);
 	}
 </script>
 
@@ -72,21 +90,44 @@
 					<line x1="12" y1="17" x2="12" y2="21"/>
 				</svg>
 			</a>
+			<div class="export-wrap">
+				<button
+					onclick={() => { showExportMenu = !showExportMenu; }}
+					aria-label="Export options"
+					aria-expanded={showExportMenu}
+					class="tool-btn"
+					class:active={showExportMenu}
+					title="Export"
+					disabled={!doc}
+				>
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+						<polyline points="7 10 12 15 17 10"/>
+						<line x1="12" y1="15" x2="12" y2="3"/>
+					</svg>
+				</button>
+				{#if showExportMenu}
+					<menu class="export-menu" role="menu">
+						<li role="none">
+							<button role="menuitem" onclick={handleExportHtml} class="export-item">
+								Export HTML
+							</button>
+						</li>
+						<li role="none">
+							<button role="menuitem" onclick={handlePrint} class="export-item">
+								Print / Save as PDF
+							</button>
+						</li>
+						<li role="none">
+							<button role="menuitem" onclick={handleCopy} class="export-item">
+								Copy Markdown
+							</button>
+						</li>
+					</menu>
+				{/if}
+			</div>
 			<button
-				onclick={handleExport}
-				aria-label="Export as HTML"
-				class="tool-btn"
-				title="Export as HTML"
-				disabled={!doc}
-			>
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-					<polyline points="7 10 12 15 17 10"/>
-					<line x1="12" y1="15" x2="12" y2="3"/>
-				</svg>
-			</button>
-			<button
-				onclick={() => { showAnalytics = !showAnalytics; showSettings = false; showBookmarks = false; }}
+				onclick={() => { showAnalytics = !showAnalytics; showSettings = false; showBookmarks = false; showExportMenu = false; }}
 				aria-label="Reading analytics"
 				aria-pressed={showAnalytics}
 				class="tool-btn"
@@ -100,7 +141,7 @@
 				</svg>
 			</button>
 			<button
-				onclick={() => { showSettings = !showSettings; showBookmarks = false; showAnalytics = false; }}
+				onclick={() => { showSettings = !showSettings; showBookmarks = false; showAnalytics = false; showExportMenu = false; }}
 				aria-label="Typography settings"
 				aria-pressed={showSettings}
 				class="tool-btn"
@@ -132,7 +173,7 @@
 				{/if}
 			</button>
 			<button
-				onclick={() => { showBookmarks = !showBookmarks; showSettings = false; showAnalytics = false; }}
+				onclick={() => { showBookmarks = !showBookmarks; showSettings = false; showAnalytics = false; showExportMenu = false; }}
 				aria-label="Bookmarks"
 				aria-pressed={showBookmarks}
 				class="tool-btn"
@@ -140,7 +181,12 @@
 				title="Bookmarks"
 			>
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+					<line x1="8" y1="6" x2="21" y2="6"/>
+					<line x1="8" y1="12" x2="21" y2="12"/>
+					<line x1="8" y1="18" x2="21" y2="18"/>
+					<line x1="3" y1="6" x2="3.01" y2="6"/>
+					<line x1="3" y1="12" x2="3.01" y2="12"/>
+					<line x1="3" y1="18" x2="3.01" y2="18"/>
 				</svg>
 				{#if readerState.bookmarks.length > 0}
 					<span class="bookmark-count" aria-label="{readerState.bookmarks.length} bookmarks">
@@ -238,5 +284,55 @@
 
 	[data-mode='focus'] :global(.mode-bar:hover) {
 		opacity: 1;
+	}
+
+	@media (hover: none) {
+		[data-mode='focus'] :global(.mode-bar) {
+			opacity: 0.6;
+		}
+	}
+
+	.export-wrap {
+		position: relative;
+	}
+
+	.export-menu {
+		position: absolute;
+		top: calc(100% + 0.5rem);
+		right: 0;
+		background-color: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 8px;
+		box-shadow: 0 4px 16px oklch(0 0 0 / 0.1);
+		padding: 0.25rem;
+		margin: 0;
+		list-style: none;
+		z-index: 50;
+		min-width: 11rem;
+		transition: background-color 400ms ease, border-color 400ms ease;
+	}
+
+	.export-item {
+		display: block;
+		width: 100%;
+		text-align: left;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.8125rem;
+		color: var(--color-ink);
+		background: transparent;
+		border: none;
+		border-radius: 6px;
+		cursor: pointer;
+		transition: background-color 200ms ease;
+		white-space: nowrap;
+	}
+
+	.export-item:hover {
+		background-color: var(--color-surface-alt);
+	}
+
+	.export-item:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: -2px;
 	}
 </style>

@@ -2,7 +2,9 @@
 	import { readerState } from '$lib/state/reader.svelte.js';
 	import { parseMarkdown } from '$lib/markdown.js';
 	import { base } from '$app/paths';
+	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import { storageGet, KEYS } from '$lib/utils/storage.js';
 
 	interface Slide {
 		html: string;
@@ -13,9 +15,24 @@
 	let current = $state(0);
 	let isFullscreen = $state(false);
 
+	async function backToReading() {
+		if (document.fullscreenElement) {
+			await document.exitFullscreen();
+		}
+		goto(`${base}/read/`);
+	}
+
 	// Parse slides from rawMarkdown on mount
 	onMount(async () => {
-		const raw = readerState.rawMarkdown;
+		let raw = readerState.rawMarkdown;
+		if (!raw) {
+			const stored = storageGet<string>(KEYS.content, '');
+			if (stored) {
+				const parsed = await parseMarkdown(stored);
+				readerState.setDoc(stored, parsed);
+				raw = stored;
+			}
+		}
 		if (!raw) return;
 
 		// Split on horizontal rule (slide delimiter)
@@ -122,7 +139,7 @@
 <div class="present-shell">
 	<!-- Minimal top bar -->
 	<nav class="present-nav" aria-label="Presentation controls">
-		<a href="{base}/read/" class="back-link">← Back to reading</a>
+		<button onclick={backToReading} class="back-link">← Back to reading</button>
 		<div class="nav-center">
 			{#if slides.length > 0}
 				<span class="slide-count" aria-live="polite">

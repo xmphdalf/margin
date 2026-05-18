@@ -10,6 +10,7 @@
 	let { open = false, onClose }: Props = $props();
 
 	function jumpTo(headingId: string) {
+		readerState.setActiveHeading(headingId);
 		scrollToElement(headingId);
 		onClose?.();
 	}

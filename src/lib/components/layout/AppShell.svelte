@@ -146,6 +146,12 @@
 		}
 	});
 
+	// ── Persist raw document content ─────────────────────────────────────────
+	$effect(() => {
+		const raw = readerState.rawMarkdown;
+		if (raw) storageSet(KEYS.content, raw);
+	});
+
 	// ── Session lifecycle: start/end when the active document changes ────────
 	let _prevDocHash = '';
 	$effect(() => {
