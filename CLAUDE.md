@@ -7,7 +7,7 @@ Margin is a **reader-first Markdown web application**. It transforms raw Markdow
 It is not an editor. Not a CMS. Not a documentation generator.
 It is a dedicated reading environment — focused on typography, spacing, cognitive comfort, and sustained attention.
 
-Margin runs entirely as a **static web application** — no backend, no accounts, no tracking. Deployable on GitHub Pages or any static host.
+Margin runs entirely as a **static web application** — no backend, no accounts, no tracking. Deployable on any static host.
 
 > The goal: a **digital reading studio for Markdown.**
 
@@ -239,7 +239,7 @@ This is the complete product vision. Build in order of priority, but design for 
 
 | Concern | Tool | Notes |
 |---|---|---|
-| Framework | SvelteKit 2.x + `@sveltejs/adapter-static` | GitHub Pages via `gh-pages` branch |
+| Framework | SvelteKit 2.x + `@sveltejs/adapter-static` | Deployed on Railway via Dockerfile |
 | Svelte syntax | **Svelte 5 runes only** | `$state`, `$derived`, `$effect` — no legacy stores, no `$:` |
 | Styling | TailwindCSS v4 | Vite plugin only — no `tailwind.config.js`, use `@theme` directive in CSS |
 | Markdown parsing | unified ecosystem | See pipeline below |
@@ -250,7 +250,6 @@ This is the complete product vision. Build in order of priority, but design for 
 
 **Hard constraints:**
 - No backend, ever
-- Deployable to GitHub Pages — `static/.nojekyll` required; `paths.base` from `BASE_PATH` env var
 - No auth, no accounts
 - No external runtime deps that break offline usage after initial load
 - Initial JS bundle target: **< 50KB gzipped** — Shiki and KaTeX never in the initial chunk
@@ -465,22 +464,30 @@ Self-host all fonts — no Google Fonts CDN. Variable fonts (one file for all we
 ```
 `font-display: swap` for body, `font-display: optional` for display fonts. Add `size-adjust` to prevent CLS on font swap.
 
-### GitHub Pages Deployment
+### Deployment
+
+Margin is deployed on Railway. The build uses a multi-stage Dockerfile: Node 22 alpine compiles the app, Caddy 2 alpine serves it.
 
 ```js
 // svelte.config.js
-adapter: adapter({
-  pages: 'build', assets: 'build',
-  fallback: '404.html',   // SPA-style 404 handling — NOT 'index.html'
-  precompress: false,
-}),
-paths: { base: process.env.BASE_PATH ?? '' }
+adapter: adapter({ fallback: 'index.html' })
 ```
 
-- `static/.nojekyll` — required, empty file, prevents Jekyll from hiding `_app/`
+```
+# Caddyfile
+:{$PORT} {
+  root * /srv
+  encode gzip
+  try_files {path} /index.html
+  file_server
+}
+```
+
+- `try_files {path} /index.html` handles SPA routing — unknown paths fall back to the SvelteKit shell
+- Railway injects `PORT`; Caddy reads it via `{$PORT}`
 - Root layout: `export const prerender = true`
-- `BASE_PATH=/repo-name` in build env for non-root deployments
-- Reference paths with `import { base } from '$app/paths'` — never hardcode
+- No `BASE_PATH` — deployed to root domain, `base` is always `''`
+- GitHub Actions runs tests and creates releases; Railway deploys independently via native GitHub integration
 
 ### LocalStorage Schema
 

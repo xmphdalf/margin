@@ -1,138 +1,79 @@
 # Margin
 
-> A quiet place to read Markdown.
+A browser-based Markdown reader. Paste, upload, or fetch any `.md` file and read it with good typography, a clean layout, and no distractions.
 
-Margin transforms raw Markdown into a calm, immersive reading experience.
-Paste, upload, or fetch any `.md` file and read it the way it deserves to be read —
-with considered typography, spacious layout, and zero distractions.
-
-**[Live demo →](https://xmphdalf.github.io/margin/)**
-
----
-
-## What it is
-
-A **reader-first** static web application. Not an editor. Not a CMS. Not a documentation generator.
-
-The best reading apps — iA Writer, Readwise Reader, Instapaper, Kindle — succeed by making the interface disappear. Margin follows that lineage, built specifically for Markdown.
-
-Runs entirely in the browser. No backend, no accounts, no tracking. Deployable on GitHub Pages or any static host.
-
----
-
-## Features
-
-**Input**
-- Paste Markdown text directly
-- Upload local `.md` files
-- Fetch from any public URL — GitHub blob links auto-converted to raw
-
-**Reading**
-- Four reading modes — Book (prose column), Focus (zero chrome), Study (persistent TOC sidebar), Story (drop caps + cinematic spacing for long-form prose)
-- Three themes — Light, Sepia, Dark — full coordinated oklch palettes, zero flash on load, respects `prefers-color-scheme` as default
-- Dynamic table of contents extracted from the Markdown AST, with scroll-spy active heading and section completion tracking
-- Scroll progress bar — CSS Scroll-Driven Animations (Chrome/Safari), JS fallback for Firefox
-- Estimated reading time — `N min read` near the title, updates to `N min left` as you scroll
-- Per-document reading position — restored on return visits, expires after 90 days
-- Bookmarks — per-document, up to 100, LRU eviction, restored on next visit
-- `J` / `K` keyboard shortcuts to jump to the next / previous section
-- Theme, reading mode, and typography settings all persisted to localStorage
-
-**Typography**
-- Font family: Source Serif 4 Variable (serif) or Inter Variable (sans)
-- Font size: 14–24px, adjustable via settings panel
-- Line height: 1.4–2.0, adjustable via settings panel
-- Column width: Narrow (60ch) / Default (68ch) / Wide (80ch)
-
-**Markdown**
-- GitHub Flavored Markdown — tables, task lists, strikethrough, autolinks
-- YAML frontmatter — title, author, date surfaced in the document header
-- LaTeX math via rehype-katex — KaTeX CSS loaded only when math is present
-- Syntax highlighting via Shiki v1 — dual themes (light + dark via CSS variables), lazy-loaded
-- Mermaid diagrams — lazy-loaded, never in the initial bundle
-- Smart typography — curly quotes, em-dashes, ellipses via remark-smartypants
-- `[[Wikilinks]]` rendered as cross-reference hints
-- Lazy image loading — `loading="lazy"` on all images via rehype plugin
-
-**Presentation mode**
-- Split slides on `---` horizontal rules
-- Keyboard arrow navigation and fullscreen
-- Touch/pointer swipe to advance; tap left half to go back, right half to advance
-- Speaker notes via `<!-- notes: ... -->` comment blocks
-
-**Export**
-- Download the document as a self-contained HTML file — inline CSS matching the current theme and typography, no external dependencies
-
----
-
-## Tech stack
-
-| Concern | Tool |
-|---|---|
-| Framework | SvelteKit 2 + `@sveltejs/adapter-static` |
-| Language | Svelte 5 runes — `$state`, `$derived`, `$effect`, `$props` |
-| Styling | TailwindCSS v4 — `@theme` tokens, no config file |
-| Markdown | unified — remark + rehype pipeline |
-| Syntax highlighting | Shiki v1 — lazy-loaded, never in initial bundle |
-| Math | remark-math + rehype-katex |
-| Diagrams | Mermaid — lazy-loaded on demand |
-| Fonts | Source Serif 4 Variable, Inter Variable, JetBrains Mono Variable via `@fontsource-variable` |
-| Deployment | GitHub Pages via GitHub Actions |
-
-Initial JS bundle target: **< 50KB gzipped**. Shiki, KaTeX, and Mermaid are never in the initial chunk.
+No backend, no accounts, no tracking. Everything runs in the browser and persists to localStorage.
 
 ---
 
 ## Running locally
 
-**Fork first — do not clone the original directly.** See [Contributing](#contributing).
+Fork first, then clone your fork.
 
 ```bash
 git clone https://github.com/<your-username>/margin.git
 cd margin
 npm install
-npm run setup-hooks   # install pre-push hook — one-time, per machine
+npm run setup-hooks   # one-time per machine
 npm run dev           # http://localhost:5173
 ```
 
-**All commands:**
-
 ```bash
-npm run dev           # start dev server
-npm run check         # TypeScript + Svelte type check (0 errors required)
-npm run build         # production build → build/
-npm run test          # Playwright end-to-end tests (10 tests across 3 inputs)
-npm run test:ui       # Playwright visual debugger — useful for investigating failures
-npm run validate      # check + build — mirrors CI exactly, run before pushing
+npm run check         # type-check (0 errors required)
+npm run build         # production build to build/
+npm run test          # 10 Playwright end-to-end tests
+npm run validate      # check + build - same as CI
 npm run preview       # serve the production build locally
-npm run setup-hooks   # install git pre-push hook
 ```
+
+---
+
+## What it does
+
+Three ways to load a document: paste Markdown directly, upload a `.md` file, or fetch from a public URL. GitHub blob URLs are auto-converted to raw.
+
+Four reading modes: Book (65ch prose column), Study (persistent TOC sidebar), Focus (zero chrome), Story (drop caps and wide spacing for long-form prose). Three themes: Light, Sepia, Dark. Typography is adjustable: font family, size, line height, and column width. All settings persist across sessions.
+
+The TOC is extracted from the Markdown AST, not the DOM. Scroll spy uses a scroll listener rather than IntersectionObserver, which fails on short sections. `J` / `K` jump between headings. Reading position is saved per document and restored on return.
+
+Full Markdown support: GFM, YAML frontmatter, LaTeX math via rehype-katex, syntax highlighting via Shiki v1, Mermaid diagrams, smart typography, `[[wikilinks]]`, lazy images. Shiki and KaTeX are never in the initial bundle.
+
+Presentation mode splits slides on `---`, supports keyboard and swipe navigation, fullscreen, and `<!-- notes: ... -->` speaker notes.
+
+Export downloads the current document as a self-contained HTML file with inline CSS.
+
+---
+
+## Stack
+
+| | |
+|---|---|
+| Framework | SvelteKit 2 + `@sveltejs/adapter-static` |
+| Language | Svelte 5 runes - `$state`, `$derived`, `$effect` |
+| Styling | TailwindCSS v4 - `@theme` tokens, no config file |
+| Markdown | unified - remark + rehype pipeline |
+| Highlighting | Shiki v1 - lazy-loaded |
+| Math | remark-math + rehype-katex |
+| Diagrams | Mermaid - lazy-loaded |
+| Fonts | Source Serif 4, Inter, JetBrains Mono via `@fontsource-variable` |
+| Deployment | Railway - Node 22 build, Caddy 2 serve |
+
+Initial JS bundle target: under 50KB gzipped.
 
 ---
 
 ## Contributing
 
-**Fork, don't clone the original.**
-Forking gives you your own copy to work on freely. Cloning the original means you can't push, and your changes become entangled with the canonical codebase.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow:
-- How to fork, set up upstream, and stay in sync
-- The local → push → CI → deploy pipeline
-- Commit message conventions (Conventional Commits)
-- PR checklist
-- Design principles every change must pass
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow: fork setup, the push to CI to deploy pipeline, commit conventions, PR checklist, and design principles.
 
 ---
 
-## Versioning & releases
+## Releases
 
-Margin uses [Semantic Versioning](https://semver.org/).
-Every release is tagged (`v0.1.0`) and published as a [GitHub Release](https://github.com/xmphdalf/margin/releases) with the changelog section as the release body.
-
-See [CHANGELOG.md](CHANGELOG.md) for the complete history.
+Tagged and published as [GitHub Releases](https://github.com/xmphdalf/margin/releases) on every version bump. Full history in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT

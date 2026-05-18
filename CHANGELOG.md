@@ -77,17 +77,17 @@ _Changes staged here are merged to a version section on each release._
   `K` jumps to the previous. Ignored when focus is inside an input or textarea.
 
 - **Story mode** — a fourth reading mode (`N` button in the mode bar) that
-  applies cinematic prose styling: chapter-sized headings, drop caps on the
-  first paragraph after each heading, generous paragraph spacing, and indented
-  text. Designed for long-form fiction and essays.
+  applies chapter-sized headings, drop caps on the first paragraph after each
+  heading, generous paragraph spacing, and indented text. Designed for
+  long-form fiction and essays.
 
 - **"N min left" reading time** — the reading time label in the document header
   switches from `{n} min read` to `{n} min left` once you begin scrolling, and
   shows `Done` at the end of the document.
 
 - **Section completion tracking** — TOC entries fade to 50% opacity once their
-  section has scrolled past the top of the viewport, giving a visual sense of
-  reading progress through the document structure.
+  section has scrolled past the top of the viewport, showing reading progress
+  through the document structure.
 
 - **Lazy image loading** — all images in rendered Markdown now receive
   `loading="lazy" decoding="async"` via a rehype plugin, deferring off-screen
@@ -154,10 +154,9 @@ _Changes staged here are merged to a version section on each release._
 
 ### Fixed
 
-- **Navigation broken on GitHub Pages** — `goto('/read/')` did not include the
-  `base` path prefix (`/margin`), causing a 404 on every input submission when
-  deployed to a GitHub Pages sub-path. Fixed by using `resolve('/read/')` from
-  `$app/paths` which correctly prepends the configured base path.
+- **Navigation broken on sub-path deployments** — `goto('/read/')` did not include the
+  `base` path prefix, causing a 404 on every input submission. Fixed by using
+  `resolve('/read/')` from `$app/paths` which correctly prepends the configured base path.
 
 - **Keyboard shortcut hint shows wrong modifier key** — the hint below the paste
   textarea always showed `⌘ + Enter` regardless of platform. Now detects the OS
@@ -197,9 +196,8 @@ _Changes staged here are merged to a version section on each release._
 - **404 on `/read/` and `/present/` after hard refresh** — The previous
   `cp build/index.html build/404.html` approach was broken: `index.html` uses
   a dynamic `new URL(".", location)` base computation that resolves incorrectly
-  when served from a sub-path (e.g. `/margin/read/`). Replaced with a `sed`
-  patch of adapter-static's own `404.html` that corrects `base: ""` to
-  `base: "/margin"` and rewrites `/_app/` asset paths to `/margin/_app/`.
+  when served from a sub-path. Replaced with a `sed` patch of adapter-static's
+  own `404.html` that corrects the base path and rewrites asset paths.
 
 ---
 
@@ -207,18 +205,17 @@ _Changes staged here are merged to a version section on each release._
 
 ### Fixed
 
-- SPA routing on GitHub Pages — `/read/` and `/present/` returned 404 because
+- SPA routing on static hosts — `/read/` and `/present/` returned 404 because
   adapter-static's generated `404.html` used absolute asset paths that broke
-  under the `/margin` BASE_PATH sub-directory. Build step now copies `index.html`
-  (which uses correct relative paths) over `404.html` so GitHub Pages serves the
-  proper SPA shell for all unknown sub-paths and client-side routing takes over.
+  under a sub-path deployment. Build step now copies `index.html` (which uses
+  correct relative paths) over `404.html` so the host serves the proper SPA
+  shell for all unknown sub-paths and client-side routing takes over.
 
 ---
 
 ## [0.1.0] — 2026-03-19
 
-Initial scaffold release. Full production-grade foundation — every architectural
-decision is in place so no rewrites are needed as features land.
+Initial scaffold release.
 
 ### Added
 
@@ -263,8 +260,7 @@ decision is in place so no rewrites are needed as features land.
 - Variable fonts via `@fontsource-variable`: Source Serif 4 Variable, Inter Variable, JetBrains Mono Variable — bundled by Vite, no external CDN
 - Anti-flash theme init: inline `<script>` in `<head>` runs synchronously before first paint
 - All localStorage access SSR-guarded, wrapped in try/catch (Safari Private mode safe)
-- GitHub Pages deployment via GitHub Actions with `BASE_PATH`-aware builds
-- `static/.nojekyll` — prevents Jekyll from hiding `_app/` folder
+- Deployment via Railway — Docker multi-stage build (Node 22 → Caddy 2), auto-deploy on push to `main`
 - TypeScript strict mode — zero `@ts-ignore` / `@ts-expect-error` annotations
 
 **Accessibility**

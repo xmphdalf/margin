@@ -1,19 +1,17 @@
 # Contributing to Margin
 
-Margin is a passion project. Contributions are welcome — but quality over quantity, always.
-If you want to experiment freely, **fork the repo** rather than cloning it directly.
-Forks let you build on top of Margin without your changes being mistaken for the canonical version.
+Contributions are welcome. If you want to experiment freely, fork the repo rather than cloning it directly. Forks keep your changes separate from the canonical codebase.
 
 ---
 
 ## Getting started
 
-**Fork first — do not clone the original repo directly.**
+**Fork first. Do not clone the original repo directly.**
 Forking gives you your own copy to build on. If you clone the original you cannot push,
 and your experiments will be tangled with the canonical codebase.
 
 ```bash
-# 1. Fork on GitHub — click the Fork button on the repo page
+# 1. Fork on GitHub (click the Fork button on the repo page)
 # 2. Clone your fork (not the original)
 git clone https://github.com/<your-username>/margin.git
 cd margin
@@ -42,14 +40,12 @@ git merge upstream/main
 
 ## Local → push → CI → deploy flow
 
-This is the full pipeline. Every step must pass before the next runs.
-
 ```
 Write code
    │
    ▼
 git push  ←─ pre-push hook runs automatically
-   │           npm test         (10 Playwright tests — 3 input flows)
+   │           npm test         (10 Playwright tests, 3 input flows)
    │           npm run check    (type-check, 0 errors required)
    │           npm run build    (production build must succeed)
    │           if any fails → push is blocked, fix locally
@@ -59,17 +55,17 @@ GitHub Actions (CI)
    │  npm test          (Playwright, Chromium only)
    │  npm run check
    │  npm run build
-   │  if any fails → deploy is cancelled, you get an email
+   │  if any fails → release is skipped, you get an email
    │
    ▼
-GitHub Pages deployed
+Railway deploys automatically (native GitHub integration, triggered on push to main)
    │
    ▼
 Git tag + GitHub Release created (only if version is new)
 ```
 
 The pre-push hook runs the same commands as CI. If it passes locally, CI passes.
-You find out about problems on your machine — not on GitHub.
+You find out about problems on your machine, not on GitHub.
 
 **To skip the hook in a genuine emergency** (do not make this a habit):
 ```bash
@@ -80,7 +76,7 @@ git push --no-verify
 
 ## Before you open a pull request
 
-- [ ] `npm test` passes — all 10 Playwright tests green
+- [ ] `npm test` passes (all 10 Playwright tests green)
 - [ ] `npm run validate` passes (`check` + `build`, zero errors, zero warnings)
 - [ ] Changes look correct across all three themes: Light, Dark, Sepia
 - [ ] No `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, or any suppression annotation
@@ -109,7 +105,7 @@ Margin uses the [Conventional Commits](https://www.conventionalcommits.org/) spe
 | `fix` | Bug fix | PATCH bump |
 | `docs` | Documentation only | none |
 | `style` | Formatting, whitespace | none |
-| `refactor` | Restructure without behaviour change | none |
+| `refactor` | Restructure without behavior change | none |
 | `perf` | Performance improvement | PATCH bump |
 | `chore` | Build, tooling, dependencies | none |
 | `ci` | CI/CD workflow changes | none |
@@ -134,8 +130,8 @@ This triggers a **MAJOR** version bump.
    Use the standard sections: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`.
 
 2. When ready to release, update two files:
-   - `package.json` — bump `"version"` per semver rules above
-   - `CHANGELOG.md` — convert `[Unreleased]` to `[x.y.z] — YYYY-MM-DD`, add a fresh empty `[Unreleased]` section at the top, update the comparison links at the bottom
+   - `package.json`: bump `"version"` per semver rules above
+   - `CHANGELOG.md`: convert `[Unreleased]` to `[x.y.z] - YYYY-MM-DD`, add a fresh empty `[Unreleased]` section at the top, update the comparison links at the bottom
 
 3. Commit:
    ```
@@ -143,11 +139,12 @@ This triggers a **MAJOR** version bump.
    ```
 
 4. Push to `main`. CI automatically:
-   - Runs `npm run check` — if this fails, nothing deploys
-   - Builds the site
-   - Deploys to GitHub Pages
+   - Runs `npm run check`; if this fails, the release step is skipped
+   - Builds the site (validation only; Railway deploys independently)
    - Creates an annotated git tag `vX.Y.Z`
    - Creates a GitHub Release with the changelog section as the body
+
+   Railway picks up the push via its native GitHub integration and deploys the Dockerfile.
 
 ---
 
@@ -168,7 +165,7 @@ Margin reaches `1.0.0` when the core feature set is stable and in real use.
 Every change to Margin must pass this test: **does this make reading calmer and better?**
 
 - The interface should disappear behind the content
-- Motion must be slow and deliberate — 300–500ms, no spring/bounce/elastic easing, ever
-- All three themes (Light, Dark, Sepia) are equal citizens — never treat dark mode as an afterthought
-- Typography is a first-class design decision — spacing, measure, and line height matter
+- Motion must be slow and deliberate: 300–500ms, no spring/bounce/elastic easing, ever
+- All three themes (Light, Dark, Sepia) are equal citizens. Never treat dark mode as an afterthought
+- Typography is a first-class design decision: spacing, measure, and line height matter
 - Default is always *less*, never *more*. If it looks like clutter, remove it.
