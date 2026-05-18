@@ -1,39 +1,15 @@
 # Contributing to Margin
 
-Contributions are welcome. If you want to experiment freely, fork the repo rather than cloning it directly. Forks keep your changes separate from the canonical codebase.
-
 ---
 
 ## Getting started
 
-**Fork first. Do not clone the original repo directly.**
-Forking gives you your own copy to build on. If you clone the original you cannot push,
-and your experiments will be tangled with the canonical codebase.
-
 ```bash
-# 1. Fork on GitHub (click the Fork button on the repo page)
-# 2. Clone your fork (not the original)
-git clone https://github.com/<your-username>/margin.git
+git clone https://github.com/xmphdalf/margin.git
 cd margin
-
-# 3. Add upstream so you can pull future changes from the original
-git remote add upstream https://github.com/xmphdalf/margin.git
-
-# 4. Install dependencies
 npm install
-
-# 5. Install the pre-push hook (one-time, per machine)
-npm run setup-hooks
-
-# 6. Start the dev server
+npm run setup-hooks   # one-time per machine
 npm run dev
-```
-
-**Staying in sync with upstream:**
-
-```bash
-git fetch upstream
-git merge upstream/main
 ```
 
 ---
@@ -124,7 +100,7 @@ This triggers a **MAJOR** version bump.
 
 ---
 
-## Release workflow (maintainers only)
+## Release workflow
 
 1. Stage your changes under `## [Unreleased]` in `CHANGELOG.md` as you work.
    Use the standard sections: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`.
@@ -144,7 +120,7 @@ This triggers a **MAJOR** version bump.
    - Creates an annotated git tag `vX.Y.Z`
    - Creates a GitHub Release with the changelog section as the body
 
-   Railway picks up the push via its native GitHub integration and deploys the Dockerfile.
+   Railway picks up the push and deploys the Dockerfile.
 
 ---
 
@@ -160,9 +136,9 @@ Margin reaches `1.0.0` when the core feature set is stable and in real use.
 
 ---
 
-## Design principles (read before proposing UI changes)
+## Design principles
 
-Every change to Margin must pass this test: **does this make reading calmer and better?**
+Every change must pass this test: **does this make reading calmer and better?**
 
 - The interface should disappear behind the content
 - Motion must be slow and deliberate: 300–500ms, no spring/bounce/elastic easing, ever

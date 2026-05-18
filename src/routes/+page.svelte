@@ -21,7 +21,7 @@
 </script>
 
 <svelte:head>
-	<title>Margin — Read Markdown beautifully</title>
+	<title>Margin</title>
 	<meta name="description" content="A reader-first Markdown web application. Paste, upload, or fetch any Markdown and read it in a calm, immersive layout." />
 </svelte:head>
 
