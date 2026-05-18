@@ -1,6 +1,6 @@
 {
   "name": "margin",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A reader-first Markdown web application",
   "type": "module",
   "scripts": {
