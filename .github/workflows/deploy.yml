@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: CI
 
 on:
   push:
@@ -7,11 +7,9 @@ on:
 
 permissions:
   contents: write   # required for tagging and creating GitHub Releases
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: ci
   cancel-in-progress: true
 
 jobs:
@@ -86,41 +84,10 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          BASE_PATH: /${{ github.event.repository.name }}
-
-      - name: Fix SPA fallback for GitHub Pages sub-path
-        # adapter-static's generated 404.html has base: "" and /_app/ paths —
-        # both missing the /margin prefix. Patch them in-place so GitHub Pages
-        # serves a working SPA shell for /read/ and /present/ on hard refresh.
-        env:
-          BASE_PATH: /${{ github.event.repository.name }}
-        run: |
-          sed -i \
-            -e "s|base: \"\"|base: \"${BASE_PATH}\"|" \
-            -e "s|\"/_app/|\"${BASE_PATH}/_app/|g" \
-            build/404.html
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build/
-
-  # ─── Deploy ─────────────────────────────────────────────────────────────────
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
-        id: deployment
 
   # ─── Release ────────────────────────────────────────────────────────────────
   release:
-    needs: [build, deploy]
+    needs: build
     runs-on: ubuntu-latest
     # Only create a new release when this version hasn't been tagged yet
     if: needs.build.outputs.tag_exists == 'false'
