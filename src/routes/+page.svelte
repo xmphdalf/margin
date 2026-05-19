@@ -1,13 +1,17 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { parseMarkdown } from '$lib/markdown.js';
 	import { readerState } from '$lib/state/reader.svelte.js';
+	import { differState } from '$lib/state/differ.svelte.js';
 	import SiteHeader from '$lib/components/layout/SiteHeader.svelte';
 	import MarkdownInput from '$lib/components/input/MarkdownInput.svelte';
+	import DiffInput from '$lib/components/input/DiffInput.svelte';
 
 	let error = $state('');
 	let showModeDropdown = $state(false);
+	let activeMode = $state<'markdown' | 'gitdiff'>('markdown');
 
 	async function handleSubmit(raw: string) {
 		error = '';
@@ -17,6 +21,18 @@
 			goto(resolve('/read/'));
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to parse document.';
+		}
+	}
+
+	async function handleDiffSubmit(raw: string) {
+		error = '';
+		try {
+			const { parseDiffRaw } = await import('$lib/diff.js');
+			const parsed = await parseDiffRaw(raw);
+			differState.setDiff(raw, parsed);
+			goto(resolve('/diff/'));
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to parse diff.';
 		}
 	}
 
@@ -52,7 +68,11 @@
 					aria-haspopup="true"
 					aria-expanded={showModeDropdown}
 				>
+					{#if activeMode === 'markdown'}
 					<span><span class="md-cap">M</span>ark<span class="md-cap">D</span>own</span>
+				{:else}
+					<span class="trigger-mono"><span class="diff-git">git </span><span class="md-cap">diff</span></span>
+				{/if}
 					<svg class="trigger-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<polyline points="6 9 12 15 18 9"/>
 					</svg>
@@ -60,18 +80,22 @@
 				{#if showModeDropdown}
 					<div class="mode-dropdown">
 						<button
-							class="mode-option mode-option--active"
-							onclick={() => { showModeDropdown = false; }}
+							class="mode-option"
+							class:mode-option--active={activeMode === 'markdown'}
+							onclick={() => { activeMode = 'markdown'; showModeDropdown = false; }}
 						>
 							<span class="option-name option-name--serif"><span class="md-cap">M</span>ark<span class="md-cap">D</span>own</span>
 							<span class="option-desc">Read prose, essays &amp; long-form notes</span>
 						</button>
 						<div class="option-rule" role="separator"></div>
-						<div class="mode-option mode-option--soon" aria-disabled="true">
-							<span class="option-name option-name--mono">git diff</span>
-							<span class="option-desc">Review code changes, beautifully</span>
-							<span class="soon-note">— coming soon</span>
-						</div>
+						<button
+							class="mode-option"
+							class:mode-option--active={activeMode === 'gitdiff'}
+							onclick={() => { activeMode = 'gitdiff'; showModeDropdown = false; }}
+						>
+							<span class="option-name option-name--mono"><span class="diff-git">git </span><span class="md-cap">diff</span></span>
+							<span class="option-desc">Read code changes, beautifully</span>
+						</button>
 					</div>
 				{/if}
 			</span>.
@@ -79,7 +103,15 @@
 	</div>
 
 	<div class="input-wrap">
-		<MarkdownInput onSubmit={handleSubmit} />
+		{#if activeMode === 'markdown'}
+			<div transition:fade={{ duration: 180 }}>
+				<MarkdownInput onSubmit={handleSubmit} />
+			</div>
+		{:else}
+			<div transition:fade={{ duration: 180 }}>
+				<DiffInput onSubmit={handleDiffSubmit} />
+			</div>
+		{/if}
 	</div>
 
 	{#if error}
@@ -144,6 +176,12 @@
 		line-height: inherit;
 	}
 
+	.trigger-mono {
+		font-family: var(--font-mono);
+		font-style: normal;
+		font-size: 0.9375em;
+	}
+
 	.mode-trigger:hover,
 	.mode-trigger.open {
 		color: var(--color-ink);
@@ -157,6 +195,10 @@
 
 	.md-cap {
 		color: var(--color-accent);
+	}
+
+	.diff-git {
+		color: var(--color-ink-muted);
 	}
 
 	.trigger-chevron {
@@ -221,11 +263,6 @@
 		background-color: var(--color-surface-alt);
 	}
 
-	.mode-option--soon {
-		opacity: 0.55;
-		cursor: default;
-	}
-
 	.option-name {
 		font-size: 1.0625rem;
 		font-weight: 500;
@@ -249,14 +286,6 @@
 		font-size: 0.8125rem;
 		color: var(--color-ink-muted);
 		line-height: 1.45;
-	}
-
-	.soon-note {
-		font-family: var(--font-serif);
-		font-style: italic;
-		font-size: 0.8125rem;
-		color: var(--color-ink-muted);
-		opacity: 0.7;
 	}
 
 	.option-rule {

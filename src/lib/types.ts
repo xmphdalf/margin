@@ -50,3 +50,47 @@ export interface ReadingPosition {
 	headingId: string;
 	savedAt: number;
 }
+
+// ─── Git Diff types ───────────────────────────────────────────────────────────
+
+export interface ParsedDiff {
+	files: DiffFile[];
+	totalAdditions: number;
+	totalDeletions: number;
+	synopsis: SynopsisEntry[];
+}
+
+export interface DiffFile {
+	id: string;
+	path: string;
+	oldPath?: string;
+	status: 'added' | 'deleted' | 'modified' | 'renamed';
+	additions: number;
+	deletions: number;
+	isGenerated: boolean;
+	hunks: DiffHunk[];
+}
+
+export interface DiffHunk {
+	lines: DiffLine[];
+}
+
+export interface DiffLine {
+	type: 'context' | 'addition' | 'deletion';
+	content: string;
+	tokens?: DiffToken[];
+	highlightedHtml?: string;
+}
+
+export interface DiffToken {
+	value: string;
+	changed: boolean;
+}
+
+export interface SynopsisEntry {
+	fileId: string;
+	path: string;
+	status: DiffFile['status'];
+	note?: string;
+	isGenerated: boolean;
+}
