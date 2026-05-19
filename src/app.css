@@ -36,6 +36,15 @@
 	--diff-del-gutter: oklch(0.52 0.16 25);
 	--diff-add-token:  oklch(0.88 0.08 145 / 0.3);
 	--diff-del-token:  oklch(0.88 0.10 25  / 0.25);
+
+	/* New-design semantic diff tokens */
+	--color-add:      oklch(0.55 0.10 145);
+	--color-add-tint: oklch(0.94 0.04 145);
+	--color-del:      oklch(0.55 0.14 25);
+	--color-del-tint: oklch(0.94 0.04 25);
+
+	/* Breath (inter-file spacing) — default normal */
+	--m-breath: 8rem;
 }
 
 /* ─── Dark theme overrides ─── */
@@ -55,6 +64,11 @@
 	--diff-del-gutter: oklch(0.65 0.15 25);
 	--diff-add-token:  oklch(0.30 0.08 145 / 0.4);
 	--diff-del-token:  oklch(0.30 0.10 25  / 0.4);
+
+	--color-add:      oklch(0.74 0.12 145);
+	--color-add-tint: oklch(0.24 0.04 145);
+	--color-del:      oklch(0.74 0.14 25);
+	--color-del-tint: oklch(0.24 0.05 25);
 }
 
 /* ─── Sepia theme overrides ─── */
@@ -351,6 +365,11 @@ body {
 	--diff-del-gutter: oklch(0.50 0.14 40);
 	--diff-add-token:  oklch(0.85 0.06 130 / 0.3);
 	--diff-del-token:  oklch(0.82 0.08 40  / 0.25);
+
+	--color-add:      oklch(0.46 0.08 145);
+	--color-add-tint: oklch(0.91 0.03 130);
+	--color-del:      oklch(0.48 0.14 30);
+	--color-del-tint: oklch(0.92 0.03 50);
 }
 
 /* ─── Diff syntax highlighting (Shiki CSS var wiring) ─── */

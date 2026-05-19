@@ -5,7 +5,7 @@
  * Steps: parse unified diff → classify files → word-level diff on line pairs
  * → synopsis heuristics → return ParsedDiff.
  */
-import type { ParsedDiff, DiffFile, DiffHunk, DiffLine, DiffToken, SynopsisEntry } from './types.js';
+import type { ParsedDiff, DiffFile, DiffHunk, DiffLine, DiffToken, SynopsisEntry, DiffMeta } from './types.js';
 import type { Highlighter, BundledLanguage } from 'shiki';
 
 // ─── Generated file patterns ──────────────────────────────────────────────────
@@ -146,6 +146,108 @@ function buildNote(file: DiffFile): string | undefined {
 	return undefined;
 }
 
+// ─── Per-file prose synopsis ──────────────────────────────────────────────────
+
+function buildFileSynopsis(file: DiffFile): string {
+	const basename = file.path.split('/').pop() ?? file.path;
+
+	if (file.status === 'added') {
+		return `Introduces ${basename}.`;
+	}
+	if (file.status === 'deleted') {
+		return `Removes ${basename}.`;
+	}
+	if (file.status === 'renamed' && file.oldPath) {
+		const oldName = file.oldPath.split('/').pop() ?? file.oldPath;
+		return `Renames ${oldName} to ${basename}.`;
+	}
+
+	const allLines = file.hunks.flatMap((h) =>
+		h.lines.map((l) => {
+			const p = l.type === 'addition' ? '+' : l.type === 'deletion' ? '-' : ' ';
+			return p + l.content;
+		})
+	);
+
+	const addedFns: string[] = [];
+	const removedFns: string[] = [];
+
+	for (const line of allLines) {
+		const m = RE_FN_ADD.exec(line);
+		if (m && !addedFns.includes(m[4])) addedFns.push(m[4]);
+	}
+	for (const line of allLines) {
+		const m = RE_FN_DEL.exec(line);
+		if (m && !removedFns.includes(m[4])) removedFns.push(m[4]);
+	}
+
+	const isTest = RE_TEST.test(file.path);
+	const isConfig = RE_CONFIG.test(file.path);
+	const hasImportChanges = allLines.some((l) => RE_IMPORT.test(l));
+
+	if (isTest) {
+		return file.additions > file.deletions
+			? `Extends test coverage in ${basename}.`
+			: `Updates tests in ${basename}.`;
+	}
+	if (isConfig) {
+		return `Adjusts configuration in ${basename}.`;
+	}
+	if (addedFns.length > 0 && removedFns.length === 0) {
+		const names = addedFns.slice(0, 2).join(' and ');
+		return `Adds ${names} to ${basename}.`;
+	}
+	if (removedFns.length > 0 && addedFns.length === 0) {
+		const names = removedFns.slice(0, 2).join(' and ');
+		return `Removes ${names} from ${basename}.`;
+	}
+	if (addedFns.length > 0 && removedFns.length > 0) {
+		return `Replaces ${removedFns[0]} with ${addedFns[0]} in ${basename}.`;
+	}
+	if (hasImportChanges) {
+		return `Updates dependencies in ${basename}.`;
+	}
+
+	const net = file.additions - file.deletions;
+	if (net > 50) return `Expands ${basename} with ${file.additions} new lines.`;
+	if (net < -50) return `Trims ${basename}, removing ${file.deletions} lines.`;
+	return `Modifies ${basename}.`;
+}
+
+// ─── PR-level meta ────────────────────────────────────────────────────────────
+
+function buildMeta(files: DiffFile[], totalAdditions: number, totalDeletions: number): DiffMeta {
+	const hunkCount = files.reduce((n, f) => n + f.hunks.length, 0);
+	const totalChanged = totalAdditions + totalDeletions;
+	// Rough estimate: ~80 changed lines per minute for code reading
+	const breathMins = Math.max(1, Math.ceil(totalChanged / 80));
+	const breath = `~${breathMins} min`;
+
+	let title: string;
+	if (files.length === 1) {
+		title = files[0].path.split('/').pop() ?? files[0].path;
+	} else if (files.length <= 3) {
+		title = files.map((f) => f.path.split('/').pop() ?? f.path).join(', ');
+	} else {
+		title = `${files.length} files changed`;
+	}
+
+	const added = files.filter((f) => f.status === 'added').length;
+	const deleted = files.filter((f) => f.status === 'deleted').length;
+	const modified = files.filter((f) => f.status === 'modified' || f.status === 'renamed').length;
+
+	const parts: string[] = [];
+	if (modified > 0) parts.push(`${modified} modified`);
+	if (added > 0) parts.push(`${added} added`);
+	if (deleted > 0) parts.push(`${deleted} removed`);
+
+	const editorsNote =
+		(parts.length > 0 ? parts.join(', ') + ' — ' : '') +
+		`${totalAdditions} additions and ${totalDeletions} deletions across ${hunkCount} hunk${hunkCount !== 1 ? 's' : ''}.`;
+
+	return { title, breath, editorsNote };
+}
+
 // ─── Language detection ───────────────────────────────────────────────────────
 
 const LANG_MAP: Record<string, string> = {
@@ -211,11 +313,27 @@ export async function parseDiffRaw(raw: string): Promise<ParsedDiff> {
 		else status = 'modified';
 
 		const hunks: DiffHunk[] = pFile.chunks.map((chunk) => {
-			const rawLines: DiffLine[] = chunk.changes.map((change) => ({
-				type: change.type === 'add' ? 'addition' : change.type === 'del' ? 'deletion' : 'context',
-				content: change.content.slice(1) // strip leading +/-/space
-			}));
-			return { lines: applyWordDiff(rawLines) };
+			const rawLines: DiffLine[] = chunk.changes.map((change) => {
+				let oldLine: number | undefined;
+				let newLine: number | undefined;
+				if (change.type === 'normal') {
+					oldLine = change.ln1;
+					newLine = change.ln2;
+				} else if (change.type === 'add') {
+					newLine = change.ln;
+				} else {
+					oldLine = change.ln;
+				}
+				return {
+					type: change.type === 'add' ? 'addition' : change.type === 'del' ? 'deletion' : 'context',
+					content: change.content.slice(1), // strip leading +/-/space
+					oldLine,
+					newLine
+				};
+			});
+			// Clean the @@ markers from the hunk header line
+			const header = chunk.content.replace(/^@@\s*/, '').replace(/\s*@@\s*/, ' ').trim();
+			return { header, lines: applyWordDiff(rawLines) };
 		});
 
 		const file: DiffFile = {
@@ -226,12 +344,18 @@ export async function parseDiffRaw(raw: string): Promise<ParsedDiff> {
 			additions: pFile.additions,
 			deletions: pFile.deletions,
 			isGenerated: isGenerated(path),
+			synopsis: '', // populated below after all files are collected
 			hunks
 		};
 
 		totalAdditions += pFile.additions;
 		totalDeletions += pFile.deletions;
 		files.push(file);
+	}
+
+	// Populate per-file prose synopses
+	for (const file of files) {
+		file.synopsis = buildFileSynopsis(file);
 	}
 
 	const synopsis: SynopsisEntry[] = files.map((file) => ({
@@ -241,6 +365,8 @@ export async function parseDiffRaw(raw: string): Promise<ParsedDiff> {
 		note: buildNote(file),
 		isGenerated: file.isGenerated
 	}));
+
+	const meta = buildMeta(files, totalAdditions, totalDeletions);
 
 	// ─── Syntax highlighting pass ─────────────────────────────────────────────
 	try {
@@ -288,5 +414,5 @@ export async function parseDiffRaw(raw: string): Promise<ParsedDiff> {
 		// Shiki unavailable — entire diff renders as plain text
 	}
 
-	return { files, totalAdditions, totalDeletions, synopsis };
+	return { files, totalAdditions, totalDeletions, synopsis, meta };
 }

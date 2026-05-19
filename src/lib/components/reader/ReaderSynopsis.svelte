@@ -1,62 +1,82 @@
 <script lang="ts">
-	import type { ParsedDiff } from '$lib/types.js';
+	import type { ParsedDoc } from '$lib/types.js';
 
 	interface Props {
-		diff: ParsedDiff;
+		doc: ParsedDoc;
 		onBegin: () => void;
-		onSkim: () => void;
 	}
 
-	let { diff, onBegin, onSkim }: Props = $props();
+	let { doc, onBegin }: Props = $props();
 
-	const { meta, files, totalAdditions, totalDeletions } = $derived(diff);
+	const title = $derived(
+		(doc.frontmatter.title as string | undefined) ||
+		doc.toc.find(e => e.depth === 1)?.text ||
+		'Untitled'
+	);
 
-	function kindMark(status: string): string {
-		if (status === 'added') return '+ new';
-		if (status === 'deleted') return '- removed';
-		return 'modified';
-	}
+	const author = $derived(doc.frontmatter.author as string | undefined);
+	const date = $derived(doc.frontmatter.date as string | undefined);
+	const description = $derived(doc.frontmatter.description as string | undefined);
+
+	// h1 and h2 only, cap at 10
+	const sections = $derived(doc.toc.filter(e => e.depth <= 2).slice(0, 10));
+	const hasSections = $derived(sections.length > 1);
+
+	const wordStr = $derived(
+		doc.wordCount >= 1000
+			? `${(doc.wordCount / 1000).toFixed(1)}k`
+			: String(doc.wordCount)
+	);
+
+	const note = $derived(
+		description ||
+		(hasSections
+			? `${wordStr} words across ${sections.length} sections.`
+			: `${wordStr} words.`)
+	);
 </script>
 
-<section class="m-syn" aria-label="Diff summary">
+<section class="m-syn" aria-label="Document overview">
 	<div class="m-syn-eyebrow">
-		<span class="eyebrow-mono">git diff</span>
+		<span>markdown</span>
 		<span class="m-dot" aria-hidden="true">·</span>
-		<span>{files.length} file{files.length !== 1 ? 's' : ''}</span>
+		<span>{wordStr} words</span>
 	</div>
 
-	<h1 class="m-syn-title">{meta.title}</h1>
+	<h1 class="m-syn-title">{title}</h1>
 
 	<div class="m-syn-meta">
-		<span class="m-breath">{meta.breath}</span>
-		<span class="m-dot" aria-hidden="true">·</span>
-		<span><span class="m-add">+{totalAdditions}</span></span>
-		<span><span class="m-del">-{totalDeletions}</span></span>
+		{#if author}
+			<span class="m-syn-author">{author}</span>
+			<span class="m-dot" aria-hidden="true">·</span>
+		{/if}
+		{#if date}
+			<span class="m-syn-date">{date}</span>
+			<span class="m-dot" aria-hidden="true">·</span>
+		{/if}
+		<span class="m-breath">~{doc.readingTime} min read</span>
 	</div>
 
-	<p class="m-syn-note">{meta.editorsNote}</p>
+	<p class="m-syn-note">{note}</p>
 
-	<div class="m-syn-files">
-		<div class="m-syn-files-label">in this read</div>
-		<ol class="m-syn-list">
-			{#each files as file, i}
-				<li class:is-generated={file.isGenerated}>
-					<span class="m-syn-n">{String(i + 1).padStart(2, '0')}</span>
-					<span class="m-syn-p">{file.path}</span>
-					<span class="m-syn-c">
-						<span class="m-add">+{file.additions}</span>
-						<span class="m-del">-{file.deletions}</span>
-					</span>
-				</li>
-			{/each}
-		</ol>
-	</div>
+	{#if hasSections}
+		<div class="m-syn-toc">
+			<div class="m-syn-toc-label">in this read</div>
+			<ol class="m-syn-list">
+				{#each sections as entry, i}
+					<li class:indent={entry.depth === 2}>
+						<span class="m-syn-n">{String(i + 1).padStart(2, '0')}</span>
+						<span class="m-syn-p">{entry.text}</span>
+					</li>
+				{/each}
+			</ol>
+		</div>
+	{/if}
 
 	<div class="m-syn-acts">
 		<button class="m-syn-go" onclick={onBegin}>
 			begin reading <span aria-hidden="true">↓</span>
 		</button>
-		<button class="m-syn-skim" onclick={onSkim}>or just skim</button>
 	</div>
 </section>
 
@@ -82,10 +102,6 @@
 		color: var(--color-ink-muted);
 		letter-spacing: 0.02em;
 		margin-bottom: 0.75rem;
-	}
-
-	.eyebrow-mono {
-		font-family: var(--font-mono);
 	}
 
 	.m-dot {
@@ -119,8 +135,11 @@
 		font-style: italic;
 	}
 
-	.m-add { color: var(--color-add); }
-	.m-del { color: var(--color-del); }
+	.m-syn-author,
+	.m-syn-date {
+		font-family: var(--font-serif);
+		font-style: italic;
+	}
 
 	.m-syn-note {
 		font-family: var(--font-serif);
@@ -131,7 +150,7 @@
 		text-wrap: pretty;
 	}
 
-	.m-syn-files-label {
+	.m-syn-toc-label {
 		font-family: var(--font-sans);
 		text-transform: lowercase;
 		letter-spacing: 0.06em;
@@ -149,7 +168,7 @@
 
 	.m-syn-list li {
 		display: grid;
-		grid-template-columns: 2.5rem 1fr auto;
+		grid-template-columns: 2.5rem 1fr;
 		align-items: baseline;
 		gap: 0.75rem;
 		padding: 0.875rem 0;
@@ -157,8 +176,9 @@
 		transition: border-color 400ms ease;
 	}
 
-	.m-syn-list li.is-generated {
-		opacity: 0.45;
+	.m-syn-list li.indent {
+		padding-left: 1.25rem;
+		opacity: 0.7;
 	}
 
 	.m-syn-n {
@@ -168,18 +188,10 @@
 	}
 
 	.m-syn-p {
-		font-family: var(--font-mono);
-		font-size: 0.875rem;
+		font-family: var(--font-serif);
+		font-size: 0.9375rem;
 		color: var(--color-ink);
-		word-break: break-all;
-	}
-
-	.m-syn-c {
-		font-family: var(--font-mono);
-		font-size: 0.75rem;
-		display: flex;
-		gap: 0.375rem;
-		flex-shrink: 0;
+		word-break: break-word;
 	}
 
 	.m-syn-acts {
@@ -205,17 +217,11 @@
 
 	.m-syn-go:hover { opacity: 0.7; }
 
-	.m-syn-skim {
-		font-family: var(--font-sans);
-		font-size: 0.875rem;
-		color: var(--color-ink-muted);
-		background: none;
-		border: none;
-		cursor: pointer;
-		transition: color 200ms ease;
+	.m-syn-go:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 3px;
+		border-radius: 2px;
 	}
-
-	.m-syn-skim:hover { color: var(--color-ink); }
 
 	@media (max-width: 600px) {
 		.m-syn {

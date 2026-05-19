@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { readerState } from '$lib/state/reader.svelte.js';
 	import { settingsState } from '$lib/state/settings.svelte.js';
 	import { themeState } from '$lib/state/theme.svelte.js';
 	import { base } from '$app/paths';
 	import SiteHeader from '$lib/components/layout/SiteHeader.svelte';
 	import ProgressBar from '$lib/components/reader/ProgressBar.svelte';
+	import ReaderSynopsis from '$lib/components/reader/ReaderSynopsis.svelte';
 	import ReaderView from '$lib/components/reader/ReaderView.svelte';
 	import ReadingModeBar from '$lib/components/reader/ReadingModeBar.svelte';
 	import BookmarkList from '$lib/components/reader/BookmarkList.svelte';
@@ -13,6 +15,9 @@
 	import ThemeToggle from '$lib/components/ui/ThemeToggle.svelte';
 
 	const doc = $derived(readerState.doc);
+
+	type View = 'synopsis' | 'read';
+	let view = $state<View>('synopsis');
 
 	let showBookmarks = $state(false);
 	let showSettings = $state(false);
@@ -49,6 +54,19 @@
 		doc?.frontmatter?.title ? `${doc.frontmatter.title} — Margin` : 'Reading — Margin'
 	);
 
+	onMount(() => {
+		function handleKey(e: KeyboardEvent) {
+			const tag = (e.target as Element).tagName;
+			if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+			if (view === 'synopsis' && (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ')) {
+				e.preventDefault();
+				view = 'read';
+			}
+		}
+		window.addEventListener('keydown', handleKey);
+		return () => window.removeEventListener('keydown', handleKey);
+	});
+
 	async function handleExportHtml() {
 		if (!doc) return;
 		showExportMenu = false;
@@ -81,7 +99,7 @@
 	<ProgressBar />
 
 	<!-- Site header — SiteHeader handles the left side; tool buttons slot into header via portal-like approach -->
-	<SiteHeader showHomeLink={true}>
+	<SiteHeader showHomeLink={true} homeLinkHref="{base}/?mode=markdown">
 		{#snippet tools()}
 			<a href="{base}/present/" class="tool-btn" title="Present" aria-label="Presentation mode">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -199,16 +217,16 @@
 
 	<!-- Main reading area -->
 	{#if doc}
-		<ReaderView {doc} />
+		{#if view === 'synopsis'}
+			<ReaderSynopsis {doc} onBegin={() => { view = 'read'; }} />
+		{:else}
+			<ReaderView {doc} />
+			<ReadingModeBar />
+			<TypographyControls open={showSettings} onClose={() => (showSettings = false)} />
+			<BookmarkList open={showBookmarks} onClose={() => (showBookmarks = false)} />
+			<AnalyticsPanel open={showAnalytics} onClose={() => (showAnalytics = false)} />
+		{/if}
 	{/if}
-
-	<!-- Reading mode switcher — floating bottom right -->
-	<ReadingModeBar />
-
-	<!-- Side panels -->
-	<TypographyControls open={showSettings} onClose={() => (showSettings = false)} />
-	<BookmarkList open={showBookmarks} onClose={() => (showBookmarks = false)} />
-	<AnalyticsPanel open={showAnalytics} onClose={() => (showAnalytics = false)} />
 </div>
 
 <style>

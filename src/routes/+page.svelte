@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -12,6 +13,11 @@
 	let error = $state('');
 	let showModeDropdown = $state(false);
 	let activeMode = $state<'markdown' | 'gitdiff'>('markdown');
+
+	onMount(() => {
+		const mode = new URLSearchParams(window.location.search).get('mode');
+		if (mode === 'gitdiff') activeMode = 'gitdiff';
+	});
 
 	async function handleSubmit(raw: string) {
 		error = '';
@@ -187,6 +193,11 @@
 		color: var(--color-ink);
 	}
 
+	.mode-trigger:hover .diff-git,
+	.mode-trigger.open .diff-git {
+		color: var(--color-ink);
+	}
+
 	.mode-trigger:focus-visible {
 		outline: 2px solid var(--color-accent);
 		outline-offset: 3px;
@@ -199,6 +210,11 @@
 
 	.diff-git {
 		color: var(--color-ink-muted);
+		transition: color 200ms ease;
+	}
+
+	.mode-option:hover .diff-git {
+		color: var(--color-ink);
 	}
 
 	.trigger-chevron {
@@ -251,15 +267,15 @@
 		border: none;
 		background: transparent;
 		text-align: left;
+		cursor: pointer;
 		transition: background-color 200ms ease;
 	}
 
-	.mode-option--active {
+	.mode-option:hover {
 		background-color: var(--color-surface-alt);
-		cursor: pointer;
 	}
 
-	.mode-option--active:hover {
+	.mode-option--active {
 		background-color: var(--color-surface-alt);
 	}
 
@@ -282,10 +298,20 @@
 		font-style: normal;
 	}
 
+	/* Inside the dropdown option, "git " should be full ink — not muted */
+	.option-name .diff-git {
+		color: inherit;
+	}
+
 	.option-desc {
 		font-size: 0.8125rem;
 		color: var(--color-ink-muted);
 		line-height: 1.45;
+		transition: color 200ms ease;
+	}
+
+	.mode-option:hover .option-desc {
+		color: var(--color-ink-muted);
 	}
 
 	.option-rule {

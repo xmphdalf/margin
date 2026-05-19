@@ -4,10 +4,14 @@
 
 	interface Props {
 		showHomeLink?: boolean;
+		/** Custom label for the home link. Defaults to 'New document'. Pass '' for icon-only. */
+		homeLinkLabel?: string;
+		/** href for the home link. Defaults to base + '/'. */
+		homeLinkHref?: string;
 		tools?: import('svelte').Snippet;
 	}
 
-	let { showHomeLink = false, tools }: Props = $props();
+	let { showHomeLink = false, homeLinkLabel = 'New document', homeLinkHref = `${base}/`, tools }: Props = $props();
 </script>
 
 <header class="site-header">
@@ -18,11 +22,11 @@
 
 		<div class="header-actions">
 			{#if showHomeLink}
-				<a href="{base}/" class="home-link">
+				<a href={homeLinkHref} class="home-link">
 					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<polyline points="15 18 9 12 15 6"/>
 					</svg>
-					New document
+					{#if homeLinkLabel}{homeLinkLabel}{/if}
 				</a>
 			{/if}
 			{#if tools}
