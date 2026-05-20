@@ -12,6 +12,7 @@
 	import { analyticsState } from '$lib/state/analytics.svelte.js';
 	import { storageGet, storageSet, KEYS, hashDoc, purgeExpiredPositions } from '$lib/utils/storage.js';
 	import { getScrollProgress } from '$lib/utils/scroll.js';
+	import { differState } from '$lib/state/differ.svelte.js';
 	import type { Theme, ReaderSettings, Bookmark, ReadingMode, ReadingPosition } from '$lib/types.js';
 	import type { ReadingSession } from '$lib/state/analytics.svelte.js';
 
@@ -150,6 +151,12 @@
 	$effect(() => {
 		const raw = readerState.rawMarkdown;
 		if (raw) storageSet(KEYS.content, raw);
+	});
+
+	// ── Persist diff content ─────────────────────────────────────────────────
+	$effect(() => {
+		const raw = differState.rawDiff;
+		if (raw) storageSet(KEYS.diffContent, raw);
 	});
 
 	// ── Session lifecycle: start/end when the active document changes ────────

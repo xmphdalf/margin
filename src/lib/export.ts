@@ -1,8 +1,8 @@
 /**
- * Export the current document as a self-contained static HTML file.
+ * Export utilities for Markdown documents and Git diffs.
  * Dynamically imported — never included in the initial bundle.
  */
-import type { ParsedDoc, ReaderSettings, Theme } from './types.js';
+import type { ParsedDoc, ParsedDiff, ReaderSettings, Theme } from './types.js';
 
 const MEASURE_MAP: Record<ReaderSettings['measure'], string> = {
 	narrow: '60ch',
@@ -166,6 +166,81 @@ export async function exportDocument(doc: ParsedDoc, settings: ReaderSettings, t
 	const a = document.createElement('a');
 	a.href = url;
 	a.download = `${slugify(title)}.html`;
+	a.click();
+	URL.revokeObjectURL(url);
+}
+
+export async function exportDiff(diff: ParsedDiff, settings: ReaderSettings, theme: Theme): Promise<void> {
+	const css = buildCSS(settings, theme);
+	const filesHtml = diff.files
+		.map((f) => {
+			const hunksHtml = f.hunks
+				.map((h) => {
+					const linesHtml = h.lines
+						.map((l) => {
+							const cls =
+								l.type === 'addition'
+									? 'diff-add'
+									: l.type === 'deletion'
+										? 'diff-del'
+										: 'diff-ctx';
+							const content = l.tokens
+								? l.tokens
+										.map((t) =>
+											t.changed
+												? `<mark class="tok-${l.type === 'addition' ? 'add' : 'del'}">${escapeHtml(t.value)}</mark>`
+												: escapeHtml(t.value)
+										)
+										.join('')
+								: escapeHtml(l.content);
+							return `<div class="dl ${cls}"><code>${content}</code></div>`;
+						})
+						.join('');
+					return `<div class="hunk">${linesHtml}</div>`;
+				})
+				.join('<hr class="hunk-sep">');
+
+			const name = f.path.split('/').pop() ?? f.path;
+			const dir = f.path.includes('/') ? f.path.slice(0, f.path.lastIndexOf('/') + 1) : '';
+			return `<section id="${escapeHtml(f.id)}"><h2><span class="dir">${escapeHtml(dir)}</span>${escapeHtml(name)}</h2><div class="hunks">${hunksHtml}</div></section>`;
+		})
+		.join('');
+
+	const diffCss = `
+.diff-add { border-left: 3px solid oklch(0.55 0.14 145); }
+.diff-del { border-left: 3px solid oklch(0.52 0.16 25); }
+.diff-ctx { opacity: 0.65; }
+.dl { display: flex; }
+.dl code { font-family: 'JetBrains Mono', monospace; font-size: 0.8125rem; padding: 0.1em 1rem; white-space: pre-wrap; word-break: break-all; flex: 1; }
+.hunk { border: 1px solid #e0e0e0; border-radius: 6px; overflow: hidden; margin-bottom: 1rem; }
+.hunk-sep { border: none; border-top: 1px dashed #e0e0e0; margin: 0.5rem 0; }
+.tok-add { background: oklch(0.88 0.08 145 / 0.3); border-radius: 2px; }
+.tok-del { background: oklch(0.88 0.10 25 / 0.25); border-radius: 2px; text-decoration: line-through; }
+h2 { font-family: monospace; font-size: 1rem; padding-top: 2rem; border-top: 1px solid #e0e0e0; margin: 2rem 0 0.75rem; }
+.dir { opacity: 0.5; }
+`;
+
+	const fullHtml = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diff — ${diff.files.length} files changed</title>
+  <style>${css}${diffCss}</style>
+</head>
+<body>
+  <main>
+    <p style="color:#666;margin-bottom:2rem">${diff.files.length} files &middot; +${diff.totalAdditions} &minus;${diff.totalDeletions}</p>
+    ${filesHtml}
+  </main>
+</body>
+</html>`;
+
+	const blob = new Blob([fullHtml], { type: 'text/html' });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement('a');
+	a.href = url;
+	a.download = 'diff.html';
 	a.click();
 	URL.revokeObjectURL(url);
 }
