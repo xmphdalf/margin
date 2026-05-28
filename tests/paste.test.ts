@@ -14,6 +14,7 @@ test.describe('Paste input', () => {
 		await btn.click();
 
 		await expect(page).toHaveURL(/\/read\//);
+		await page.getByRole('button', { name: /begin reading/i }).click();
 		await expect(page.locator('article h1')).toContainText('Hello Paste');
 	});
 
@@ -26,6 +27,7 @@ test.describe('Paste input', () => {
 		await textarea.press('Control+Enter');
 
 		await expect(page).toHaveURL(/\/read\//);
+		await page.getByRole('button', { name: /begin reading/i }).click();
 		await expect(page.locator('article h1')).toContainText('Keyboard Submit');
 	});
 

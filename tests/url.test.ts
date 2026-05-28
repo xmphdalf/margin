@@ -23,6 +23,7 @@ test.describe('URL input', () => {
 		await page.getByRole('button', { name: /Fetch/ }).click();
 
 		await expect(page).toHaveURL(/\/read\//);
+		await page.getByRole('button', { name: /begin reading/i }).click();
 		await expect(page.locator('article h1')).toContainText('Fetched Document');
 	});
 
@@ -47,6 +48,7 @@ test.describe('URL input', () => {
 		await page.getByRole('button', { name: /Fetch/ }).click();
 
 		await expect(page).toHaveURL(/\/read\//);
+		await page.getByRole('button', { name: /begin reading/i }).click();
 		await expect(page.locator('article h1')).toContainText('From GitHub Blob');
 	});
 

@@ -16,6 +16,7 @@ test.describe('Upload input', () => {
 		await fileInput.setInputFiles(FIXTURE_MD);
 
 		await expect(page).toHaveURL(/\/read\//);
+		await page.getByRole('button', { name: /begin reading/i }).click();
 		await expect(page.locator('article h1')).toContainText('Sample Upload Document');
 	});
 
@@ -52,6 +53,7 @@ test.describe('Upload input', () => {
 		});
 
 		await expect(page).toHaveURL(/\/read\//);
+		await page.getByRole('button', { name: /begin reading/i }).click();
 		await expect(page.locator('article h1')).toContainText('Text File');
 	});
 });
