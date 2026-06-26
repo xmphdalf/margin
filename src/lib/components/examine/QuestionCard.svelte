@@ -75,9 +75,8 @@
 	}
 
 	.question-stem {
-		font-family: var(--font-serif);
-		font-size: 1.125rem;
-		line-height: 1.65;
+		font-size: var(--prose-size, 1.125rem);
+		line-height: var(--prose-lh, 1.65);
 		font-weight: 400;
 		color: var(--color-ink);
 		margin: 0;
