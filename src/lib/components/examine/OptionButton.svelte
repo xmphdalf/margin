@@ -68,9 +68,8 @@
 		background: var(--color-surface);
 		text-align: left;
 		width: 100%;
-		font-family: var(--font-sans);
-		font-size: 1rem;
-		line-height: 1.55;
+		font-size: var(--prose-size, 1.125rem);
+		line-height: var(--prose-lh, 1.65);
 		color: var(--color-ink);
 		transition: border-color 200ms ease, background-color 200ms ease;
 	}
@@ -132,9 +131,8 @@
 
 	.explanation {
 		color: var(--color-ink-muted);
-		font-family: var(--font-sans);
-		font-size: 0.9375rem;
-		line-height: 1.65;
+		font-size: calc(var(--prose-size, 1.125rem) * 0.83);
+		line-height: var(--prose-lh, 1.65);
 		margin: 0.5rem 0 0;
 		padding: 0.75rem 1rem;
 		border-left: 2px solid var(--color-border);

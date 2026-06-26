@@ -86,9 +86,8 @@
 
 	.shared-explanation {
 		color: var(--color-ink-muted);
-		font-family: var(--font-sans);
-		font-size: 0.9375rem;
-		line-height: 1.65;
+		font-size: calc(var(--prose-size, 1.125rem) * 0.83);
+		line-height: var(--prose-lh, 1.65);
 		margin: 0.25rem 0 0;
 		padding: 0.75rem 1rem;
 		border-left: 2px solid var(--color-border);
