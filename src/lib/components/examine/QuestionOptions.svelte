@@ -17,6 +17,18 @@
 		if (!selected) return false;
 		return Array.isArray(selected) ? selected.includes(key) : selected === key;
 	}
+
+	/** Group options by identical explanation text, so repeated explanations show once. */
+	const explanationGroups = $derived.by(() => {
+		const groups: { keys: string[]; text: string }[] = [];
+		for (const option of question.content.options ?? []) {
+			if (!option.explanation) continue;
+			const existing = groups.find((g) => g.text === option.explanation);
+			if (existing) existing.keys.push(option.key);
+			else groups.push({ keys: [option.key], text: option.explanation });
+		}
+		return groups;
+	});
 </script>
 
 <div class="options">
@@ -57,10 +69,8 @@
 		{/each}
 		{#if revealed && question.type === 'multiple-choice-multiple-correct'}
 			<div class="shared-explanation">
-				{#each question.content.options ?? [] as option}
-					{#if option.explanation}
-						<p><strong>{option.key}.</strong> {option.explanation}</p>
-					{/if}
+				{#each explanationGroups as group}
+					<p><strong>{group.keys.join(', ')}.</strong> {group.text}</p>
 				{/each}
 			</div>
 		{/if}
