@@ -149,7 +149,7 @@
 
 	.m-syn-list li {
 		display: grid;
-		grid-template-columns: 2.5rem 1fr auto;
+		grid-template-columns: 2.5rem minmax(0, 1fr) auto;
 		align-items: baseline;
 		gap: 0.75rem;
 		padding: 0.875rem 0;

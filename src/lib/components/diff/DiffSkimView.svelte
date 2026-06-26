@@ -85,7 +85,7 @@
 
 	.m-skim-item {
 		display: grid;
-		grid-template-columns: 3rem 1fr;
+		grid-template-columns: 3rem minmax(0, 1fr);
 		gap: 1.25rem;
 		padding: 1.75rem 0;
 		border-bottom: 1px solid var(--color-border);

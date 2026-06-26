@@ -267,7 +267,7 @@
 	/* Lines: 4-column grid */
 	.m-line {
 		display: grid;
-		grid-template-columns: 2.5rem 2.5rem 1.25rem 1fr;
+		grid-template-columns: 2.5rem 2.5rem 1.25rem minmax(0, 1fr);
 		align-items: baseline;
 		padding: 0 0.25rem;
 		white-space: pre-wrap;
@@ -290,7 +290,7 @@
 		user-select: none;
 	}
 
-	.m-code { color: var(--color-ink); }
+	.m-code { color: var(--color-ink); overflow-wrap: anywhere; }
 
 	/* Addition row */
 	.m-line-add {
@@ -377,6 +377,6 @@
 	@media (max-width: 720px) {
 		.m-file-mast { padding: 0 1.25rem; }
 		.m-hunk { padding: 0 1rem; }
-		.m-line { grid-template-columns: 1.75rem 1.75rem 1rem 1fr; }
+		.m-line { grid-template-columns: 1.75rem 1.75rem 1rem minmax(0, 1fr); }
 	}
 </style>
