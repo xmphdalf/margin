@@ -15,7 +15,29 @@ Commits follow the [Conventional Commits](https://www.conventionalcommits.org/en
 
 ## [Unreleased]
 
-_Changes staged here are merged to a version section on each release._
+### Added
+
+- **Examine — quiz/study module** — Margin's third native module, alongside
+  Markdown and git diff reading. Paste or upload a JSON question set (single-
+  choice, multi-correct, and true/false questions), pick a question range and
+  a mode, then study:
+  - **Read** — browse every question with its answer and explanation, no
+    interaction required.
+  - **Reflect** — one question at a time; select your answer(s) first,
+    "Reveal answer" only unlocks once you've picked the required number of
+    options, then decorates your picks against the correct answer in place.
+  - **Examine** — linear test with an optional timer (off by default),
+    flag-for-revisit, and dot-row progress. "Review & submit" is reachable
+    from any question and shows attempted count, the flagged-question list,
+    and a final Submit step before results are revealed.
+
+  Results report counts honestly — "you answered N of M correctly," never a
+  percentage or grade — with a full per-question breakdown and a "questions
+  to revisit" list (incorrect answers ∪ flagged questions). Sessions persist
+  to localStorage (`margin-examine-set-v1`, `margin-examine-session-v1`) and
+  resume after a refresh, with a 90-day expiry matching reading-position
+  persistence. New route: `/examine`, entered via a third option in the
+  home page's mode dropdown.
 
 ---
 

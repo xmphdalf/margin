@@ -46,6 +46,8 @@ Load a document three ways: paste Markdown, upload a `.md` file, or fetch from a
 
 **Presentation mode:** slides on `---`, keyboard + swipe navigation, fullscreen, speaker notes via `<!-- notes: ... -->`.
 
+**Examine mode:** paste or upload a JSON question set and study it via Read (browse all), Reflect (self-paced flashcards), or Examine (linear test with optional timer, flag-for-revisit, a pre-submit review screen, and honest no-percentage results).
+
 **Export:** self-contained HTML with inline CSS, no external dependencies.
 
 ---

@@ -1,4 +1,4 @@
-# Margin — Claude Context
+# Margin — Codex Context
 
 ## What Is Margin
 
@@ -590,7 +590,7 @@ These are different products. Do not scope-creep toward them.
 
 ---
 
-## Coding Principles for Claude
+## Coding Principles for Codex
 
 When working on Margin, follow these without exception:
 
