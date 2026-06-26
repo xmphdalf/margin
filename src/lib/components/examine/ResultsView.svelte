@@ -61,6 +61,7 @@
 
 	<div class="actions">
 		<button class="nav-button" onclick={onRetake}>Retake</button>
+		<button class="nav-button" onclick={() => examineState.backToSetup()}>Change range or mode</button>
 		<button class="nav-button primary" onclick={onLoadNewSet}>Load new set</button>
 	</div>
 </div>
@@ -114,6 +115,7 @@
 
 	.actions {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 0.75rem;
 	}
 

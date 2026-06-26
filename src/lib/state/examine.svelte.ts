@@ -82,5 +82,10 @@ export const examineState = {
 		rawSet = '';
 		questionSet = null;
 		session = null;
+	},
+
+	/** Return to setup for the same loaded question set — no re-upload needed. */
+	backToSetup() {
+		session = null;
 	}
 };

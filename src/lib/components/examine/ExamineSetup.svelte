@@ -106,7 +106,7 @@
 
 <style>
 	.setup {
-		max-width: 680px;
+		max-width: var(--prose-measure, 68ch);
 		margin: 0 auto;
 		padding: 3rem 1.5rem;
 		display: flex;
