@@ -37,6 +37,8 @@ export const KEYS = {
 	mode: 'margin-mode',
 	content: 'margin-content-v1',
 	diffContent: 'margin-diff-v1',
+	examineSet: 'margin-examine-set-v1',
+	examineSession: 'margin-examine-session-v1',
 	position: (hash: string) => `margin-position-${hash}`
 } satisfies Record<string, string | ((hash: string) => string)>;
 

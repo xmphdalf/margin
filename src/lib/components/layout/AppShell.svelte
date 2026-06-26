@@ -13,6 +13,7 @@
 	import { storageGet, storageSet, KEYS, hashDoc, purgeExpiredPositions } from '$lib/utils/storage.js';
 	import { getScrollProgress } from '$lib/utils/scroll.js';
 	import { differState } from '$lib/state/differ.svelte.js';
+	import { examineState } from '$lib/state/examine.svelte.js';
 	import type { Theme, ReaderSettings, Bookmark, ReadingMode, ReadingPosition } from '$lib/types.js';
 	import type { ReadingSession } from '$lib/state/analytics.svelte.js';
 
@@ -157,6 +158,16 @@
 	$effect(() => {
 		const raw = differState.rawDiff;
 		if (raw) storageSet(KEYS.diffContent, raw);
+	});
+
+	// ── Persist examine question set + session ───────────────────────────────
+	$effect(() => {
+		const raw = examineState.rawSet;
+		if (raw) storageSet(KEYS.examineSet, raw);
+	});
+	$effect(() => {
+		const session = examineState.session;
+		if (session) storageSet(KEYS.examineSession, session);
 	});
 
 	// ── Session lifecycle: start/end when the active document changes ────────

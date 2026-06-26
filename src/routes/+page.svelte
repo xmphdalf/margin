@@ -6,17 +6,20 @@
 	import { parseMarkdown } from '$lib/markdown.js';
 	import { readerState } from '$lib/state/reader.svelte.js';
 	import { differState } from '$lib/state/differ.svelte.js';
+	import { examineState } from '$lib/state/examine.svelte.js';
 	import SiteHeader from '$lib/components/layout/SiteHeader.svelte';
 	import MarkdownInput from '$lib/components/input/MarkdownInput.svelte';
 	import DiffInput from '$lib/components/input/DiffInput.svelte';
+	import ExamineInput from '$lib/components/input/ExamineInput.svelte';
 
 	let error = $state('');
 	let showModeDropdown = $state(false);
-	let activeMode = $state<'markdown' | 'gitdiff'>('markdown');
+	let activeMode = $state<'markdown' | 'gitdiff' | 'examine'>('markdown');
 
 	onMount(() => {
 		const mode = new URLSearchParams(window.location.search).get('mode');
 		if (mode === 'gitdiff') activeMode = 'gitdiff';
+		else if (mode === 'examine') activeMode = 'examine';
 	});
 
 	async function handleSubmit(raw: string) {
@@ -39,6 +42,18 @@
 			goto(resolve('/diff/'));
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to parse diff.';
+		}
+	}
+
+	async function handleExamineSubmit(raw: string) {
+		error = '';
+		try {
+			const { parseQuestionSet } = await import('$lib/examine.js');
+			const qs = parseQuestionSet(raw);
+			examineState.setQuestionSet(raw, qs);
+			goto(resolve('/examine/'));
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to parse question set.';
 		}
 	}
 
@@ -65,7 +80,7 @@
 	<div class="home-hero">
 		<h1 class="hero-title">margin</h1>
 		<div class="hero-sub">
-			A quiet place to read
+			A quiet place to
 			<span class="mode-selector">
 				<button
 					class="mode-trigger"
@@ -75,9 +90,11 @@
 					aria-expanded={showModeDropdown}
 				>
 					{#if activeMode === 'markdown'}
-					<span><span class="md-cap">M</span>ark<span class="md-cap">D</span>own</span>
+					<span>read <span class="md-cap">M</span>ark<span class="md-cap">D</span>own</span>
+				{:else if activeMode === 'gitdiff'}
+					<span class="trigger-mono">read <span class="diff-git">git </span><span class="md-cap">diff</span></span>
 				{:else}
-					<span class="trigger-mono"><span class="diff-git">git </span><span class="md-cap">diff</span></span>
+					<span><span class="md-cap">e</span>xamine</span>
 				{/if}
 					<svg class="trigger-chevron" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
 						<polyline points="6 9 12 15 18 9"/>
@@ -102,6 +119,15 @@
 							<span class="option-name option-name--mono"><span class="diff-git">git </span><span class="md-cap">diff</span></span>
 							<span class="option-desc">Read code changes, beautifully</span>
 						</button>
+						<div class="option-rule" role="separator"></div>
+						<button
+							class="mode-option"
+							class:mode-option--active={activeMode === 'examine'}
+							onclick={() => { activeMode = 'examine'; showModeDropdown = false; }}
+						>
+							<span class="option-name option-name--serif"><span class="md-cap">e</span>xamine</span>
+							<span class="option-desc">Read, reflect, or examine what you know</span>
+						</button>
 					</div>
 				{/if}
 			</span>.
@@ -113,9 +139,13 @@
 			<div transition:fade={{ duration: 180 }}>
 				<MarkdownInput onSubmit={handleSubmit} />
 			</div>
-		{:else}
+		{:else if activeMode === 'gitdiff'}
 			<div transition:fade={{ duration: 180 }}>
 				<DiffInput onSubmit={handleDiffSubmit} />
+			</div>
+		{:else}
+			<div transition:fade={{ duration: 180 }}>
+				<ExamineInput onSubmit={handleExamineSubmit} />
 			</div>
 		{/if}
 	</div>

@@ -112,3 +112,79 @@ export interface SynopsisEntry {
 	note?: string;
 	isGenerated: boolean;
 }
+
+// ─── Examine types ──────────────────────────────────────────────────────────
+
+export type QuestionType = 'multiple-choice' | 'multiple-choice-multiple-correct' | 'true-false';
+export type ExamineMode = 'read' | 'reflect' | 'examine';
+
+export interface QuestionOption {
+	key: string;
+	text: string;
+	isCorrect: boolean;
+	explanation: string;
+}
+
+export interface Question {
+	id: string;
+	number: number;
+	categoryId?: string;
+	type: QuestionType;
+	content: {
+		stem: string;
+		/** multiple-choice, multiple-choice-multiple-correct */
+		options?: QuestionOption[];
+		/** multiple-choice-multiple-correct */
+		correctCount?: number;
+		/** true-false */
+		correct?: 'true' | 'false';
+		/** true-false */
+		explanation?: string;
+	};
+	tags?: string[];
+}
+
+export interface QuestionCategory {
+	id: string;
+	name: string;
+	questionIds: string[];
+}
+
+export interface QuestionSetMetadata {
+	id: string;
+	title: string;
+	description?: string;
+	totalQuestions: number;
+	author?: string;
+	difficulty?: string;
+	[key: string]: unknown;
+}
+
+export interface QuestionSet {
+	metadata: QuestionSetMetadata;
+	categories?: QuestionCategory[];
+	questions: Question[];
+}
+
+export interface UserAnswer {
+	questionId: string;
+	selected: string | string[];
+	isCorrect: boolean;
+	timestamp: number;
+}
+
+export interface ExamineSession {
+	setTitle: string;
+	totalQuestions: number;
+	selectedRange: { from: number; to: number };
+	mode: ExamineMode;
+	currentIndex: number;
+	/** Keyed by questionId — a plain object, not a Map, so it survives JSON.stringify */
+	answers: Record<string, UserAnswer>;
+	/** questionIds flagged for revisit */
+	flagged: string[];
+	timerEnabled: boolean;
+	startedAt: number | null;
+	lastSavedAt: number | null;
+	finishedAt: number | null;
+}
