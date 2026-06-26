@@ -26,8 +26,8 @@
 
 	const revealLabel = $derived.by(() => {
 		if (canReveal) return 'Reveal answer';
-		const remaining = required - selectionCount;
-		return `Select ${remaining} more`;
+		if (selectionCount === 0) return required === 1 ? 'Select an answer' : `Select ${required}`;
+		return `Select ${required - selectionCount} more`;
 	});
 
 	function handleSelect(key: string) {
@@ -54,7 +54,7 @@
 
 		{#key index}
 			<QuestionFrame>
-				<QuestionCard {question} total={questions.length} />
+				<QuestionCard {question} />
 				<QuestionOptions {question} {selected} {revealed} interactive={!revealed} onSelect={handleSelect} />
 				{#if !revealed}
 					<button class="nav-button primary reveal-btn" disabled={!canReveal} onclick={reveal}>

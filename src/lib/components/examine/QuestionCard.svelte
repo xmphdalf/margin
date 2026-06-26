@@ -3,20 +3,16 @@
 
 	interface Props {
 		question: Question;
-		/** total question count in this session — when given, renders "Q 02 of 03" */
-		total?: number;
 		flagged?: boolean;
 		onToggleFlag?: () => void;
 	}
 
-	let { question, total, flagged = false, onToggleFlag }: Props = $props();
+	let { question, flagged = false, onToggleFlag }: Props = $props();
 </script>
 
 <div class="question-card">
 	<div class="question-header">
-		<span class="question-number">
-			Q {String(question.number).padStart(2, '0')}{#if total} of {String(total).padStart(2, '0')}{/if}
-		</span>
+		<span class="question-number">Q {String(question.number).padStart(2, '0')}</span>
 		{#if onToggleFlag}
 			<button
 				class="flag-btn"
