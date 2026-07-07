@@ -17,6 +17,14 @@ Commits follow the [Conventional Commits](https://www.conventionalcommits.org/en
 
 ### Added
 
+- **Case studies in Examine** — a question set may now include a `caseStudies`
+  array (`{ id, title, body }`), and any question may reference one via
+  `caseStudyId` — or none, remaining a standalone question. Associated
+  questions show a quiet "Case study · {title}" disclosure above the stem
+  (collapsed by default) in every mode: Read, Reflect, Examine, and Results.
+  Blank lines in the body separate paragraphs. Mirrors the case-study format
+  used by GCP-style certification exams. (#14)
+
 - **Examine — quiz/study module** — Margin's third native module, alongside
   Markdown and git diff reading. Paste or upload a JSON question set (single-
   choice, multi-correct, and true/false questions), pick a question range and
@@ -38,6 +46,14 @@ Commits follow the [Conventional Commits](https://www.conventionalcommits.org/en
   resume after a refresh, with a 90-day expiry matching reading-position
   persistence. New route: `/examine`, entered via a third option in the
   home page's mode dropdown.
+
+### Fixed
+
+- **Diff lines no longer break the layout on wide changes** — a long unbroken
+  token (lockfile hash, URL, minified code) forced the diff line grid wider
+  than the viewport because the code column's `1fr` track refused to shrink
+  and `pre-wrap` never breaks mid-token. The code cell now sets `min-width: 0`
+  and `overflow-wrap: anywhere` in both the chapter and single-hunk views. (#11)
 
 ---
 

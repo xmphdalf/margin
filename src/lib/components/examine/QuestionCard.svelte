@@ -1,5 +1,8 @@
 <script lang="ts">
 	import type { Question } from '$lib/types.js';
+	import { examineState } from '$lib/state/examine.svelte.js';
+	import { caseStudyFor } from '$lib/examine.js';
+	import CaseStudyBlock from './CaseStudyBlock.svelte';
 
 	interface Props {
 		question: Question;
@@ -8,6 +11,10 @@
 	}
 
 	let { question, flagged = false, onToggleFlag }: Props = $props();
+
+	const caseStudy = $derived(
+		examineState.questionSet ? caseStudyFor(examineState.questionSet, question) : undefined
+	);
 </script>
 
 <div class="question-card">
@@ -24,6 +31,9 @@
 			</button>
 		{/if}
 	</div>
+	{#if caseStudy}
+		<CaseStudyBlock {caseStudy} />
+	{/if}
 	<p class="question-stem">{question.content.stem}</p>
 </div>
 

@@ -629,11 +629,39 @@ Or single-page app with state-driven view switching.
 - User selects True or False
 - Result: string ("true" or "false")
 
+### Case Studies (optional)
+
+For exam styles that attach groups of questions to a shared scenario (e.g. GCP
+certification case studies), a set may declare top-level `caseStudies` and link
+questions to them. A question either references one case study or none —
+unlinked questions are standalone.
+
+```json
+{
+  "caseStudies": [
+    {
+      "id": "cs-1",
+      "title": "EHR Healthcare",
+      "body": "Company overview...\n\nSolution concept... (blank lines separate paragraphs)"
+    }
+  ],
+  "questions": [
+    { "id": "q1", "number": 1, "caseStudyId": "cs-1", "type": "multiple-choice", "content": { } },
+    { "id": "q2", "number": 2, "type": "true-false", "content": { } }
+  ]
+}
+```
+
+Associated questions render a collapsed "Case study · {title}" disclosure above
+the stem in every mode (Read, Reflect, Examine, Results).
+
 ### Validation Rules
 - All questions must have unique `id`
 - All questions must have sequential `number`
 - `correctCount` (for multiple-correct) must match count of options with `isCorrect: true`
 - At least one option must be `isCorrect: true`
+- Case studies must have unique `id`, a `title`, and a `body`
+- A question's `caseStudyId`, when present, must reference a declared case study
 
 ---
 

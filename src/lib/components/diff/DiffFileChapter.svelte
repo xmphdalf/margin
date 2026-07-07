@@ -290,7 +290,12 @@
 		user-select: none;
 	}
 
-	.m-code { color: var(--color-ink); }
+	.m-code {
+		color: var(--color-ink);
+		/* Long unbroken tokens (hashes, URLs, minified code) must wrap, not widen the grid */
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
 
 	/* Addition row */
 	.m-line-add {

@@ -4,7 +4,7 @@
  * Steps: JSON.parse → structural validation → return QuestionSet.
  * Grading is pure and stateless — no side effects, no storage access.
  */
-import type { Question, QuestionSet } from './types.js';
+import type { CaseStudy, Question, QuestionSet } from './types.js';
 
 function fail(message: string): never {
 	throw new Error(message);
@@ -29,6 +29,18 @@ export function parseQuestionSet(raw: string): QuestionSet {
 
 	const questions = set.questions as Question[];
 
+	const caseStudyIds = new Set<string>();
+	if (set.caseStudies !== undefined) {
+		if (!Array.isArray(set.caseStudies)) fail('caseStudies must be an array.');
+		for (const cs of set.caseStudies as CaseStudy[]) {
+			if (!cs.id) fail('Every case study needs a unique id.');
+			if (caseStudyIds.has(cs.id)) fail(`Duplicate case study id: "${cs.id}".`);
+			caseStudyIds.add(cs.id);
+			if (!cs.title) fail(`Case study "${cs.id}" is missing a title.`);
+			if (!cs.body) fail(`Case study "${cs.id}" is missing a body.`);
+		}
+	}
+
 	const ids = new Set<string>();
 	const numbers: number[] = [];
 	for (const q of questions) {
@@ -38,6 +50,10 @@ export function parseQuestionSet(raw: string): QuestionSet {
 		numbers.push(q.number);
 
 		if (!q.content?.stem) fail(`Question "${q.id}" is missing content.stem.`);
+
+		if (q.caseStudyId && !caseStudyIds.has(q.caseStudyId)) {
+			fail(`Question "${q.id}" references an unknown case study: "${q.caseStudyId}".`);
+		}
 
 		if (q.type === 'true-false') {
 			if (q.content.correct !== 'true' && q.content.correct !== 'false') {
@@ -63,6 +79,12 @@ export function parseQuestionSet(raw: string): QuestionSet {
 	if (!sequential) fail('Question numbers must be sequential, starting at 1.');
 
 	return set as QuestionSet;
+}
+
+/** The case study a question belongs to, or undefined for standalone questions. */
+export function caseStudyFor(set: QuestionSet, question: Question): CaseStudy | undefined {
+	if (!question.caseStudyId) return undefined;
+	return set.caseStudies?.find((cs) => cs.id === question.caseStudyId);
 }
 
 /** How many options must be selected before an answer can be revealed/submitted. */
@@ -112,11 +134,19 @@ export const SAMPLE_QUESTION_SET_JSON = `{
     "title": "Sample Question Set",
     "totalQuestions": 3
   },
+  "caseStudies": [
+    {
+      "id": "cs-1",
+      "title": "Margin at a Glance",
+      "body": "Margin is a reader-first Markdown web application.\\n\\nIt runs entirely as a static site — no backend, no accounts, no tracking."
+    }
+  ],
   "questions": [
     {
       "id": "q1",
       "number": 1,
       "type": "multiple-choice",
+      "caseStudyId": "cs-1",
       "content": {
         "stem": "Which token system does Margin use for color?",
         "options": [

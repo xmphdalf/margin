@@ -230,6 +230,7 @@ This is the complete product vision. Build in order of priority, but design for 
 ### Examine (Quiz / Study Mode)
 - Third native module, alongside Markdown reading and git diff reading — entered via the same home-page mode dropdown
 - Input: paste or upload a JSON question set (single-choice, multi-correct, and true/false question types); a "view sample format" disclosure shows the schema
+- Optional case studies: a set may declare `caseStudies` (`{ id, title, body }`) and any question may link one via `caseStudyId` — or none, staying standalone. Linked questions show a collapsed "Case study · {title}" disclosure above the stem in all modes
 - Pick a question range (all, quartile presets, or custom) and a mode, then **Begin**:
   - **Read** — browse every question with its answer and explanation, no interaction required
   - **Reflect** — one question at a time; select your answer(s) first, "Reveal answer" unlocks only once you've picked the required number of options, then decorates your picks against the correct answer
@@ -534,13 +535,13 @@ Navigation: keyboard (arrow keys / space), pointer swipe (left/right), and tap-t
 
 ### Examine Module
 
-Data model and parsing/grading logic live in `src/lib/examine.ts` (`parseQuestionSet`, `isAnswerCorrect`, `toggleSelection`, `requiredSelectionCount`) — pure functions, no state, no side effects, mirroring how `diff.ts` is kept separate from `differ.svelte.ts`.
+Data model and parsing/grading logic live in `src/lib/examine.ts` (`parseQuestionSet`, `isAnswerCorrect`, `toggleSelection`, `requiredSelectionCount`, `caseStudyFor`) — pure functions, no state, no side effects, mirroring how `diff.ts` is kept separate from `differ.svelte.ts`.
 
 State: `src/lib/state/examine.svelte.ts` (`examineState`) holds `rawSet`, `questionSet`, and `session` as module-level `$state`, exposed via getters + setter methods — same plain-object pattern as `reader.svelte.ts`. Reflect mode's in-progress selection is local component state, never written to `examineState` — only `Examine` mode's answers feed the session and Results.
 
 Route: `/examine` is client-only (`ssr = false`), entered only via the home page's `ExamineInput` (paste/upload JSON, same tab pattern as `MarkdownInput`/`DiffInput`). `+page.ts` mirrors `read/+page.ts` — tries to hydrate `questionSet` + `session` from storage, discarding a session whose `lastSavedAt` is older than 90 days, then redirects home if there's still nothing to show. The route itself switches between `setup` → `resume` (only if a session was actually restored mid-progress) → `session` (Read/Reflect/Examine, picked by `session.mode`) → `review` (Examine mode only, reachable any time via "Review & submit") → `results` (once `finishSession()` sets `session.finishedAt`) — all as local `$derived` stage logic in `+page.svelte`, the same single-route-many-stages approach `present/+page.svelte` uses for slides.
 
-Components live under `src/lib/components/examine/`. `QuestionCard` (header + stem only) and `QuestionOptions` (renders the right option shape per question type, consolidating multi-correct explanations into one shared block rather than repeating them per option) are shared by `ReadMode`, `ReflectMode`, `ExamineMode`, and `ResultsView` — each mode only supplies the interaction props it needs. `QuestionFrame` gives Reflect/Examine's single-question views the bordered/padded card chrome with a 300ms entrance animation; Read/Results stay flat (list views).
+Components live under `src/lib/components/examine/`. `QuestionCard` (header + optional collapsed `CaseStudyBlock` + stem) and `QuestionOptions` (renders the right option shape per question type, consolidating multi-correct explanations into one shared block rather than repeating them per option) are shared by `ReadMode`, `ReflectMode`, `ExamineMode`, and `ResultsView` — each mode only supplies the interaction props it needs. `QuestionFrame` gives Reflect/Examine's single-question views the bordered/padded card chrome with a 300ms entrance animation; Read/Results stay flat (list views).
 
 ---
 

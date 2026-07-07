@@ -125,10 +125,19 @@ export interface QuestionOption {
 	explanation: string;
 }
 
+export interface CaseStudy {
+	id: string;
+	title: string;
+	/** Scenario text; blank lines separate paragraphs */
+	body: string;
+}
+
 export interface Question {
 	id: string;
 	number: number;
 	categoryId?: string;
+	/** Links this question to a shared case study; absent = standalone question */
+	caseStudyId?: string;
 	type: QuestionType;
 	content: {
 		stem: string;
@@ -163,6 +172,7 @@ export interface QuestionSetMetadata {
 export interface QuestionSet {
 	metadata: QuestionSetMetadata;
 	categories?: QuestionCategory[];
+	caseStudies?: CaseStudy[];
 	questions: Question[];
 }
 

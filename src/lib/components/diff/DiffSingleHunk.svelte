@@ -199,7 +199,12 @@
 		text-align: center;
 	}
 
-	.m-code { color: var(--color-ink); }
+	.m-code {
+		color: var(--color-ink);
+		/* Long unbroken tokens (hashes, URLs, minified code) must wrap, not widen the grid */
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
 
 	.m-line-add {
 		background: color-mix(in oklch, var(--color-add-tint) 60%, transparent);
