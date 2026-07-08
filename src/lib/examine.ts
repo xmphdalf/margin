@@ -103,7 +103,9 @@ export function toggleSelection(
 ): string | string[] {
 	if (question.type === 'multiple-choice-multiple-correct') {
 		const arr = Array.isArray(current) ? current : [];
-		return arr.includes(key) ? arr.filter((k) => k !== key) : [...arr, key];
+		if (arr.includes(key)) return arr.filter((k) => k !== key);
+		if (arr.length >= requiredSelectionCount(question)) return arr;
+		return [...arr, key];
 	}
 	return key;
 }

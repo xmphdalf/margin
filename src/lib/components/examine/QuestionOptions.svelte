@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Question } from '$lib/types.js';
+	import { requiredSelectionCount } from '$lib/examine.js';
 	import OptionButton from './OptionButton.svelte';
 
 	interface Props {
@@ -17,6 +18,13 @@
 		if (!selected) return false;
 		return Array.isArray(selected) ? selected.includes(key) : selected === key;
 	}
+
+	/** Once a multi-correct question has its required picks, further unselected options disable. */
+	const atMax = $derived(
+		question.type === 'multiple-choice-multiple-correct' &&
+			Array.isArray(selected) &&
+			selected.length >= requiredSelectionCount(question)
+	);
 
 	/** Group options by identical explanation text, so repeated explanations show once. */
 	const explanationGroups = $derived.by(() => {
@@ -64,6 +72,7 @@
 				correct={option.isCorrect}
 				{revealed}
 				{interactive}
+				disabled={atMax && !isSelected(option.key)}
 				onSelect={() => onSelect?.(option.key)}
 			/>
 		{/each}

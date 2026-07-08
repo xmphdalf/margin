@@ -11,6 +11,8 @@
 		revealed?: boolean;
 		/** clickable (Examine mode, before results); false everywhere else */
 		interactive?: boolean;
+		/** at the multi-correct selection cap and not itself selected — blocks further picks */
+		disabled?: boolean;
 		onSelect?: () => void;
 	}
 
@@ -22,6 +24,7 @@
 		correct = false,
 		revealed = false,
 		interactive = false,
+		disabled = false,
 		onSelect
 	}: Props = $props();
 
@@ -31,7 +34,14 @@
 
 <div class="option-wrap">
 	{#if interactive}
-		<button type="button" class="option" class:selected onclick={onSelect} aria-pressed={selected}>
+		<button
+			type="button"
+			class="option"
+			class:selected
+			{disabled}
+			onclick={onSelect}
+			aria-pressed={selected}
+		>
 			<span class="option-key">{optionKey}</span>
 			<span class="option-text">{text}</span>
 		</button>
@@ -86,6 +96,16 @@
 	.option.selected {
 		border-color: var(--color-accent);
 		background-color: var(--color-surface-alt);
+	}
+
+	button.option:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	button.option:disabled:hover {
+		border-color: var(--color-border);
+		background: var(--color-surface);
 	}
 
 	.option.right {
