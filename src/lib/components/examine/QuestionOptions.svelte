@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Question } from '$lib/types.js';
-	import { requiredSelectionCount } from '$lib/examine.js';
+	import { requiredSelectionCount, seededShuffle, questionSeed } from '$lib/examine.js';
+	import { examineState } from '$lib/state/examine.svelte.js';
 	import OptionButton from './OptionButton.svelte';
 
 	interface Props {
@@ -25,6 +26,14 @@
 			Array.isArray(selected) &&
 			selected.length >= requiredSelectionCount(question)
 	);
+
+	/** Display order — shuffled per-question when the session opts in; true-false has nothing to shuffle. */
+	const displayOptions = $derived.by(() => {
+		const options = question.content.options ?? [];
+		const session = examineState.session;
+		if (question.type === 'true-false' || !session?.shuffleOptions) return options;
+		return seededShuffle(options, questionSeed(session.shuffleSeed, question.id));
+	});
 
 	/** Group options by identical explanation text, so repeated explanations show once. */
 	const explanationGroups = $derived.by(() => {
@@ -63,7 +72,7 @@
 			<p class="shared-explanation">{question.content.explanation}</p>
 		{/if}
 	{:else}
-		{#each question.content.options ?? [] as option}
+		{#each displayOptions as option}
 			<OptionButton
 				optionKey={option.key}
 				text={option.text}

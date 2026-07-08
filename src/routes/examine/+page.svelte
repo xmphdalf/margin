@@ -11,6 +11,7 @@
 	import ExamineReview from '$lib/components/examine/ExamineReview.svelte';
 	import ResultsView from '$lib/components/examine/ResultsView.svelte';
 	import ResumePrompt from '$lib/components/examine/ResumePrompt.svelte';
+	import { seededShuffle } from '$lib/examine.js';
 	import type { ExamineMode as ExamineModeType } from '$lib/types.js';
 
 	let { data }: { data: { restored: boolean } } = $props();
@@ -19,9 +20,15 @@
 	let reviewing = $state(false);
 	let showSettings = $state(false);
 
-	function handleBegin(range: { from: number; to: number }, mode: ExamineModeType, timerEnabled: boolean) {
+	function handleBegin(
+		range: { from: number; to: number },
+		mode: ExamineModeType,
+		timerEnabled: boolean,
+		shuffleQuestions: boolean,
+		shuffleOptions: boolean
+	) {
 		reviewing = false;
-		examineState.startSession(range, mode, timerEnabled);
+		examineState.startSession(range, mode, timerEnabled, shuffleQuestions, shuffleOptions);
 	}
 
 	function handleLoadNewSet() {
@@ -33,7 +40,13 @@
 		const session = examineState.session;
 		if (!session) return;
 		reviewing = false;
-		examineState.startSession(session.selectedRange, session.mode, session.timerEnabled);
+		examineState.startSession(
+			session.selectedRange,
+			session.mode,
+			session.timerEnabled,
+			session.shuffleQuestions,
+			session.shuffleOptions
+		);
 	}
 
 	type Stage = 'setup' | 'resume' | 'session' | 'review' | 'results';
@@ -50,9 +63,10 @@
 		const qs = examineState.questionSet;
 		const session = examineState.session;
 		if (!qs || !session) return [];
-		return qs.questions
+		const inRange = qs.questions
 			.filter((q) => q.number >= session.selectedRange.from && q.number <= session.selectedRange.to)
 			.sort((a, b) => a.number - b.number);
+		return session.shuffleQuestions ? seededShuffle(inRange, session.shuffleSeed) : inRange;
 	});
 </script>
 
@@ -91,7 +105,9 @@
 				examineState.startSession(
 					examineState.session!.selectedRange,
 					examineState.session!.mode,
-					examineState.session!.timerEnabled
+					examineState.session!.timerEnabled,
+					examineState.session!.shuffleQuestions,
+					examineState.session!.shuffleOptions
 				);
 			}}
 		/>

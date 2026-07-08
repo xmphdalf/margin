@@ -188,6 +188,10 @@ export interface ExamineSession {
 	totalQuestions: number;
 	selectedRange: { from: number; to: number };
 	mode: ExamineMode;
+	shuffleQuestions: boolean;
+	shuffleOptions: boolean;
+	/** Seeds the deterministic shuffle so the same order survives reloads; regenerated per session */
+	shuffleSeed: number;
 	currentIndex: number;
 	/** Keyed by questionId — a plain object, not a Map, so it survives JSON.stringify */
 	answers: Record<string, UserAnswer>;

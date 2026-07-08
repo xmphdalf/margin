@@ -5,6 +5,7 @@
  * Grading is pure and stateless — no side effects, no storage access.
  */
 import type { CaseStudy, Question, QuestionSet } from './types.js';
+import { hashDoc } from './utils/storage.js';
 
 function fail(message: string): never {
 	throw new Error(message);
@@ -127,6 +128,33 @@ export function isAnswerCorrect(question: Question, selected: string | string[])
 
 	// multiple-choice (single correct)
 	return !Array.isArray(selected) && correctKeys.has(selected);
+}
+
+function mulberry32(seed: number): () => number {
+	let a = seed;
+	return () => {
+		a |= 0;
+		a = (a + 0x6d2b79f5) | 0;
+		let t = Math.imul(a ^ (a >>> 15), 1 | a);
+		t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
+}
+
+/** Deterministic Fisher-Yates shuffle — the same seed always produces the same order. */
+export function seededShuffle<T>(items: T[], seed: number): T[] {
+	const rng = mulberry32(seed);
+	const result = [...items];
+	for (let i = result.length - 1; i > 0; i--) {
+		const j = Math.floor(rng() * (i + 1));
+		[result[i], result[j]] = [result[j], result[i]];
+	}
+	return result;
+}
+
+/** Derives a per-question seed so each question's options shuffle independently, not identically. */
+export function questionSeed(sessionSeed: number, questionId: string): number {
+	return sessionSeed ^ parseInt(hashDoc(questionId), 36);
 }
 
 /** Static, hand-written example covering all three question types — display-only, never parsed. */

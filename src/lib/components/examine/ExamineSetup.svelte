@@ -3,7 +3,13 @@
 
 	interface Props {
 		questionSet: QuestionSet;
-		onBegin: (range: { from: number; to: number }, mode: ExamineMode, timerEnabled: boolean) => void;
+		onBegin: (
+			range: { from: number; to: number },
+			mode: ExamineMode,
+			timerEnabled: boolean,
+			shuffleQuestions: boolean,
+			shuffleOptions: boolean
+		) => void;
 	}
 
 	let { questionSet, onBegin }: Props = $props();
@@ -25,6 +31,8 @@
 	let customTo = $state(1);
 	let mode = $state<ExamineMode>('examine');
 	let timerEnabled = $state(false);
+	let shuffleQuestions = $state(false);
+	let shuffleOptions = $state(false);
 
 	const selectedRange = $derived.by(() => {
 		if (rangeChoice === 'all') return { from: 1, to: total };
@@ -88,6 +96,18 @@
 		</div>
 	</fieldset>
 
+	<fieldset class="control-group">
+		<legend class="control-label">Shuffle</legend>
+		<label class="toggle-row">
+			<input type="checkbox" bind:checked={shuffleQuestions} />
+			<span>Shuffle question order</span>
+		</label>
+		<label class="toggle-row">
+			<input type="checkbox" bind:checked={shuffleOptions} />
+			<span>Shuffle option order</span>
+		</label>
+	</fieldset>
+
 	{#if mode === 'examine'}
 		<label class="toggle-row">
 			<input type="checkbox" bind:checked={timerEnabled} />
@@ -98,7 +118,7 @@
 	<button
 		class="nav-button primary"
 		disabled={!rangeValid}
-		onclick={() => onBegin(selectedRange, mode, timerEnabled)}
+		onclick={() => onBegin(selectedRange, mode, timerEnabled, shuffleQuestions, shuffleOptions)}
 	>
 		Begin »
 	</button>

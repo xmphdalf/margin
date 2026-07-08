@@ -28,13 +28,22 @@ export const examineState = {
 		session = null; // a freshly loaded set clears any prior session
 	},
 
-	startSession(range: { from: number; to: number }, mode: ExamineMode, timerEnabled: boolean) {
+	startSession(
+		range: { from: number; to: number },
+		mode: ExamineMode,
+		timerEnabled: boolean,
+		shuffleQuestions = false,
+		shuffleOptions = false
+	) {
 		if (!questionSet) return;
 		session = {
 			setTitle: questionSet.metadata.title,
 			totalQuestions: questionSet.questions.length,
 			selectedRange: range,
 			mode,
+			shuffleQuestions,
+			shuffleOptions,
+			shuffleSeed: Math.floor(Math.random() * 2 ** 31),
 			currentIndex: 0,
 			answers: {},
 			flagged: [],
