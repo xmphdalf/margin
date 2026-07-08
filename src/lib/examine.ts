@@ -138,7 +138,7 @@ export const SAMPLE_QUESTION_SET_JSON = `{
     {
       "id": "cs-1",
       "title": "Margin at a Glance",
-      "body": "Margin is a reader-first Markdown web application.\\n\\nIt runs entirely as a static site — no backend, no accounts, no tracking."
+      "body": "Margin is a reader-first Markdown web application.\\n\\n## Architecture\\n\\n- Runs entirely as a static site\\n- No backend, no accounts, no tracking\\n\\n## Design Tokens\\n\\nColor is defined with the **oklch** color space throughout."
     }
   ],
   "questions": [

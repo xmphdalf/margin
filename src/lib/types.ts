@@ -128,7 +128,7 @@ export interface QuestionOption {
 export interface CaseStudy {
 	id: string;
 	title: string;
-	/** Scenario text; blank lines separate paragraphs */
+	/** Markdown scenario text — headings, lists, bold, and paragraphs are supported */
 	body: string;
 }
 

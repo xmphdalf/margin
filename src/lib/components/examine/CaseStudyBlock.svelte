@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { CaseStudy } from '$lib/types.js';
+	import { renderCaseStudyMarkdown } from '$lib/caseStudyMarkdown.js';
 
 	interface Props {
 		caseStudy: CaseStudy;
@@ -9,12 +10,7 @@
 
 	let expanded = $state(false);
 
-	const paragraphs = $derived(
-		caseStudy.body
-			.split(/\n\s*\n/)
-			.map((p) => p.trim())
-			.filter(Boolean)
-	);
+	const html = $derived(renderCaseStudyMarkdown(caseStudy.body));
 </script>
 
 <div class="case-study">
@@ -39,9 +35,8 @@
 
 	{#if expanded}
 		<div class="case-study-body">
-			{#each paragraphs as paragraph}
-				<p>{paragraph}</p>
-			{/each}
+			<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+			{@html html}
 		</div>
 	{/if}
 </div>
@@ -109,7 +104,7 @@
 		}
 	}
 
-	.case-study-body p {
+	.case-study-body :global(p) {
 		font-size: calc(var(--prose-size, 1.125rem) * 0.875);
 		line-height: var(--prose-lh, 1.65);
 		color: var(--color-ink-muted);
@@ -118,7 +113,50 @@
 		overflow-wrap: break-word;
 	}
 
-	.case-study-body p:last-child {
+	.case-study-body :global(h1),
+	.case-study-body :global(h2),
+	.case-study-body :global(h3),
+	.case-study-body :global(h4) {
+		font-size: calc(var(--prose-size, 1.125rem) * 0.9375);
+		line-height: var(--prose-lh, 1.65);
+		font-weight: 600;
+		color: var(--color-ink);
+		margin: 1.25em 0 0.5em;
+	}
+
+	.case-study-body :global(ul),
+	.case-study-body :global(ol) {
+		font-size: calc(var(--prose-size, 1.125rem) * 0.875);
+		line-height: var(--prose-lh, 1.65);
+		color: var(--color-ink-muted);
+		margin: 0 0 0.875em;
+		padding-left: 1.25em;
+	}
+
+	.case-study-body :global(li) {
+		margin: 0 0 0.25em;
+	}
+
+	.case-study-body :global(li > ul),
+	.case-study-body :global(li > ol) {
+		margin-top: 0.25em;
+		margin-bottom: 0;
+	}
+
+	.case-study-body :global(strong) {
+		color: var(--color-ink);
+		font-weight: 600;
+	}
+
+	.case-study-body :global(a) {
+		color: var(--color-accent);
+	}
+
+	.case-study-body :global(:first-child) {
+		margin-top: 0;
+	}
+
+	.case-study-body :global(:last-child) {
 		margin-bottom: 0;
 	}
 </style>
