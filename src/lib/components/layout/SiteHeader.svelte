@@ -17,7 +17,7 @@
 <header class="site-header">
 	<div class="header-inner">
 		<a href="{base}/" class="wordmark" aria-label="xMargin — home">
-			xmargin
+			xMargin
 		</a>
 
 		<div class="header-actions">
@@ -65,6 +65,7 @@
 		color: var(--color-ink);
 		text-decoration: none;
 		transition: opacity 200ms ease;
+		user-select: none;
 	}
 
 	.wordmark:hover {

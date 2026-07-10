@@ -1,6 +1,6 @@
 # xMargin
 
-A browser-based Markdown reader focused on typography and distraction-free reading. No backend, no accounts, no tracking.
+A browser-based reading studio for Markdown, diffs, and quizzes — focused on typography and distraction-free reading. No backend, no accounts, no tracking.
 
 **Live:** [xmargin.app](https://xmargin.app)
 
@@ -45,6 +45,8 @@ Load a document three ways: paste Markdown, upload a `.md` file, or fetch from a
 **Markdown:** GFM, YAML frontmatter, LaTeX math via rehype-katex, syntax highlighting via Shiki v1, Mermaid diagrams, smart quotes, `[[wikilinks]]`, lazy images. Shiki and KaTeX are never in the initial bundle.
 
 **Presentation mode:** slides on `---`, keyboard + swipe navigation, fullscreen, speaker notes via `<!-- notes: ... -->`.
+
+**Diff mode:** paste or upload a git diff and read it as prose — synopsis overview, skim view, single-hunk focus, or full file-by-file chapters.
 
 **Examine mode:** paste or upload a JSON question set and study it via Read (browse all), Reflect (self-paced flashcards), or Examine (linear test with optional timer, flag-for-revisit, a pre-submit review screen, and honest no-percentage results). Questions can be grouped under shared case studies (GCP-exam style) or stand alone.
 

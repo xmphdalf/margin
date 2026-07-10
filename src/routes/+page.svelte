@@ -78,7 +78,7 @@
 
 <main class="home-main" id="main-content">
 	<div class="home-hero">
-		<h1 class="hero-title">xmargin</h1>
+		<h1 class="hero-title">xMargin</h1>
 		<div class="hero-sub">
 			A quiet place to
 			<span class="mode-selector">
@@ -176,6 +176,7 @@
 		letter-spacing: -0.03em;
 		color: var(--color-ink);
 		margin: 0 0 0.5rem;
+		user-select: none;
 	}
 
 	.hero-sub {
