@@ -1,6 +1,10 @@
 :{$PORT} {
-  root * /srv
   encode gzip
+
+  @legacy host margin.up.railway.app
+  redir @legacy https://xmargin.app{uri} permanent
+
+  root * /srv
   try_files {path} /index.html
   file_server
 }
