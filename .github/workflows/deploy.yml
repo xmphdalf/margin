@@ -127,6 +127,6 @@ jobs:
           VERSION: ${{ needs.build.outputs.version }}
         run: |
           gh release create "${TAG}" \
-            --title "Margin ${TAG}" \
+            --title "xMargin ${TAG}" \
             --notes-file /tmp/release-notes.md \
             --verify-tag

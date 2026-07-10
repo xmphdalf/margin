@@ -1,13 +1,13 @@
-# Margin — Claude Context
+# xMargin — Claude Context
 
-## What Is Margin
+## What Is xMargin
 
-Margin is a **reader-first Markdown web application**. It transforms raw Markdown into a calm, immersive reading experience.
+xMargin is a **reader-first Markdown web application**. It transforms raw Markdown into a calm, immersive reading experience.
 
 It is not an editor. Not a CMS. Not a documentation generator.
 It is a dedicated reading environment — focused on typography, spacing, cognitive comfort, and sustained attention.
 
-Margin runs entirely as a **static web application** — no backend, no accounts, no tracking. Deployable on any static host.
+xMargin runs entirely as a **static web application** — no backend, no accounts, no tracking. Deployable on any static host.
 
 > The goal: a **digital reading studio for Markdown.**
 
@@ -17,9 +17,9 @@ Margin runs entirely as a **static web application** — no backend, no accounts
 
 > Reading requires space.
 
-Markdown is widely used for writing, but most tools optimize for *editing* rather than *reading*. Margin reverses that priority entirely.
+Markdown is widely used for writing, but most tools optimize for *editing* rather than *reading*. xMargin reverses that priority entirely.
 
-The best reading apps — iA Writer, Readwise Reader, Instapaper, Kindle — succeed by making the interface disappear. Typography is a first-class design decision. Restraint is a feature. Margin follows this lineage.
+The best reading apps — iA Writer, Readwise Reader, Instapaper, Kindle — succeed by making the interface disappear. Typography is a first-class design decision. Restraint is a feature. xMargin follows this lineage.
 
 **Core principles:**
 - The interface should disappear behind the content
@@ -29,7 +29,7 @@ The best reading apps — iA Writer, Readwise Reader, Instapaper, Kindle — suc
 - The product must feel timeless, not trendy
 - Privacy and openness are first-class values
 
-Margin is not built to maximize engagement. It is built to support deep focus and thoughtful reading.
+xMargin is not built to maximize engagement. It is built to support deep focus and thoughtful reading.
 
 ---
 
@@ -377,7 +377,7 @@ Toggle via class on `<html>`:
 **Anti-Flash Init** — inline script in `app.html` `<head>`, runs synchronously before CSS paints:
 ```html
 <script>
-  var stored = localStorage.getItem('margin-theme');
+  var stored = localStorage.getItem('xmargin-theme');
   var t = stored ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   if (t === 'dark') document.documentElement.classList.add('dark');
   if (t === 'sepia') document.documentElement.setAttribute('data-theme', 'sepia');
@@ -389,7 +389,7 @@ Theme transition: `transition: background-color 400ms ease, color 400ms ease, bo
 
 Persist via `$effect` in `AppShell.svelte`:
 ```ts
-$effect(() => { localStorage.setItem('margin-theme', theme); });
+$effect(() => { localStorage.setItem('xmargin-theme', theme); });
 ```
 
 ### TailwindCSS v4 Patterns
@@ -421,7 +421,7 @@ const progressPercent = $derived(Math.round(scrollProgress * 100));
 
 // Effect: side effects only — DOM mutations, localStorage, observers
 $effect(() => {
-  localStorage.setItem('margin:settings:v1', JSON.stringify(settings));
+  localStorage.setItem('xmargin:settings:v1', JSON.stringify(settings));
 });
 
 // Props (replaces export let)
@@ -478,7 +478,7 @@ Self-host all fonts — no Google Fonts CDN. Variable fonts (one file for all we
 
 ### Deployment
 
-Margin is deployed on Railway. The build uses a multi-stage Dockerfile: Node 22 alpine compiles the app, Caddy 2 alpine serves it.
+xMargin is deployed on Railway. The build uses a multi-stage Dockerfile: Node 22 alpine compiles the app, Caddy 2 alpine serves it.
 
 ```js
 // svelte.config.js
@@ -505,13 +505,13 @@ adapter: adapter({ fallback: 'index.html' })
 
 ```ts
 // Keys (all use hyphen separator, defined in src/lib/utils/storage.ts KEYS object)
-'margin-settings-v1'        // typography + display prefs (ReaderSettings)
-'margin-theme'              // 'light' | 'dark' | 'sepia'
-'margin-mode'               // 'book' | 'focus' | 'study' | 'story'
-'margin-position-{hash}'    // { scrollY, headingId, savedAt } — expires 90d, hash = djb2(rawMarkdown)
-'margin-bookmarks'          // Bookmark[] — max 100, LRU eviction
-'margin-examine-set-v1'     // raw JSON of the active question set
-'margin-examine-session-v1' // ExamineSession — range, mode, answers, flags, timer
+'xmargin-settings-v1'        // typography + display prefs (ReaderSettings)
+'xmargin-theme'              // 'light' | 'dark' | 'sepia'
+'xmargin-mode'               // 'book' | 'focus' | 'study' | 'story'
+'xmargin-position-{hash}'    // { scrollY, headingId, savedAt } — expires 90d, hash = djb2(rawMarkdown)
+'xmargin-bookmarks'          // Bookmark[] — max 100, LRU eviction
+'xmargin-examine-set-v1'     // raw JSON of the active question set
+'xmargin-examine-session-v1' // ExamineSession — range, mode, answers, flags, timer
 
 // All reads/writes wrapped in try/catch (Safari Private Browsing throws on setItem)
 // Always spread defaults as base to handle missing keys after schema change
@@ -579,7 +579,7 @@ Defer expensive operations (Shiki highlighting of large documents) to `requestId
 
 ## Non-Goals
 
-Margin will never be:
+xMargin will never be:
 - A collaborative editor
 - A publishing platform
 - A note-taking knowledge base
@@ -593,7 +593,7 @@ These are different products. Do not scope-creep toward them.
 
 ## Coding Principles for Claude
 
-When working on Margin, follow these without exception:
+When working on xMargin, follow these without exception:
 
 1. **No unnecessary complexity.** Every line justifies its existence. Simple over clever.
 2. **No speculative features.** Build only what is asked. No configurability, error handling, or abstractions for hypothetical futures.
@@ -614,7 +614,7 @@ When working on Margin, follow these without exception:
 
 ## Vision
 
-> Margin aims to become the most elegant way to read Markdown on the web.
+> xMargin aims to become the most elegant way to read Markdown on the web.
 
 The best reading apps share one quality: they disappear. The reader is left alone with the words. Every design decision, every technical constraint, every coding principle in this document serves that one purpose.
 

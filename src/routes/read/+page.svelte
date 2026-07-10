@@ -51,7 +51,7 @@
 	}
 
 	const pageTitle = $derived(
-		doc?.frontmatter?.title ? `${doc.frontmatter.title} — Margin` : 'Reading — Margin'
+		doc?.frontmatter?.title ? `${doc.frontmatter.title} — xMargin` : 'Reading — xMargin'
 	);
 
 	onMount(() => {

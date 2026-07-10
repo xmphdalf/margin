@@ -1,12 +1,12 @@
-# Contributing to Margin
+# Contributing to xMargin
 
 ---
 
 ## Getting started
 
 ```bash
-git clone https://github.com/xmphdalf/margin.git
-cd margin
+git clone https://github.com/xmphdalf/xmargin.git
+cd xmargin
 npm install
 npm run setup-hooks   # one-time per machine
 npm run dev
@@ -63,7 +63,7 @@ git push --no-verify
 
 ## Commit messages
 
-Margin uses the [Conventional Commits](https://www.conventionalcommits.org/) spec.
+xMargin uses the [Conventional Commits](https://www.conventionalcommits.org/) spec.
 
 ```
 <type>[optional scope]: <short description>
@@ -132,7 +132,7 @@ This triggers a **MAJOR** version bump.
 | Bug fix | Fix TOC scroll spy on iOS | `0.2.0` → `0.2.1` |
 | Breaking change | Rename localStorage key | `0.2.1` → `1.0.0` |
 
-Margin reaches `1.0.0` when the core feature set is stable and in real use.
+xMargin reaches `1.0.0` when the core feature set is stable and in real use.
 
 ---
 

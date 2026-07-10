@@ -167,8 +167,8 @@ export const SAMPLE_QUESTION_SET_JSON = `{
   "caseStudies": [
     {
       "id": "cs-1",
-      "title": "Margin at a Glance",
-      "body": "Margin is a reader-first Markdown web application.\\n\\n## Architecture\\n\\n- Runs entirely as a static site\\n- No backend, no accounts, no tracking\\n\\n## Design Tokens\\n\\nColor is defined with the **oklch** color space throughout."
+      "title": "xMargin at a Glance",
+      "body": "xMargin is a reader-first Markdown web application.\\n\\n## Architecture\\n\\n- Runs entirely as a static site\\n- No backend, no accounts, no tracking\\n\\n## Design Tokens\\n\\nColor is defined with the **oklch** color space throughout."
     }
   ],
   "questions": [
@@ -178,9 +178,9 @@ export const SAMPLE_QUESTION_SET_JSON = `{
       "type": "multiple-choice",
       "caseStudyId": "cs-1",
       "content": {
-        "stem": "Which token system does Margin use for color?",
+        "stem": "Which token system does xMargin use for color?",
         "options": [
-          { "key": "A", "text": "Tailwind defaults", "isCorrect": false, "explanation": "Margin defines its own semantic tokens." },
+          { "key": "A", "text": "Tailwind defaults", "isCorrect": false, "explanation": "xMargin defines its own semantic tokens." },
           { "key": "B", "text": "oklch semantic tokens", "isCorrect": true, "explanation": "Three-layer token system, oklch throughout." }
         ]
       }
@@ -190,11 +190,11 @@ export const SAMPLE_QUESTION_SET_JSON = `{
       "number": 2,
       "type": "multiple-choice-multiple-correct",
       "content": {
-        "stem": "Which of these are Margin reading modes? (choose 2)",
+        "stem": "Which of these are xMargin reading modes? (choose 2)",
         "correctCount": 2,
         "options": [
           { "key": "A", "text": "Book", "isCorrect": true, "explanation": "A core reading mode." },
-          { "key": "B", "text": "Arcade", "isCorrect": false, "explanation": "Not a Margin mode." },
+          { "key": "B", "text": "Arcade", "isCorrect": false, "explanation": "Not an xMargin mode." },
           { "key": "C", "text": "Focus", "isCorrect": true, "explanation": "A core reading mode." }
         ]
       }
@@ -204,7 +204,7 @@ export const SAMPLE_QUESTION_SET_JSON = `{
       "number": 3,
       "type": "true-false",
       "content": {
-        "stem": "Margin shows a percentage score after an exam.",
+        "stem": "xMargin shows a percentage score after an exam.",
         "correct": "false",
         "explanation": "Examine reports counts honestly — never a percentage or grade."
       }

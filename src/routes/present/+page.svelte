@@ -131,7 +131,7 @@
 </script>
 
 <svelte:head>
-	<title>Presentation — Margin</title>
+	<title>Presentation — xMargin</title>
 </svelte:head>
 
 <svelte:window onkeydown={handleKeydown} />

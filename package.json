@@ -1,6 +1,6 @@
 {
-  "name": "margin",
-  "version": "0.1.5",
+  "name": "xmargin",
+  "version": "1.0.0",
   "description": "A reader-first Markdown web application",
   "type": "module",
   "scripts": {

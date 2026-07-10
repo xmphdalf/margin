@@ -16,8 +16,8 @@
 
 <header class="site-header">
 	<div class="header-inner">
-		<a href="{base}/" class="wordmark" aria-label="Margin — home">
-			margin
+		<a href="{base}/" class="wordmark" aria-label="xMargin — home">
+			xmargin
 		</a>
 
 		<div class="header-actions">

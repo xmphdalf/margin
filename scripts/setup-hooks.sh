@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install git hooks for Margin.
+# Install git hooks for xMargin.
 # Run once after cloning your fork: npm run setup-hooks
 
 set -euo pipefail

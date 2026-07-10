@@ -1,16 +1,16 @@
-# Margin
+# xMargin
 
 A browser-based Markdown reader focused on typography and distraction-free reading. No backend, no accounts, no tracking.
 
-**Live:** [margin.up.railway.app](https://margin.up.railway.app)
+**Live:** [xmargin.app](https://xmargin.app)
 
 ---
 
 ## Quick start
 
 ```bash
-git clone https://github.com/xmphdalf/margin.git
-cd margin
+git clone https://github.com/xmphdalf/xmargin.git
+cd xmargin
 npm install
 npm run setup-hooks
 npm run dev

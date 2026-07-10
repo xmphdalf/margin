@@ -29,17 +29,17 @@ export function storageRemove(key: string): void {
 	} catch {}
 }
 
-/** Namespaced storage keys — all margin data lives under 'margin-*' */
+/** Namespaced storage keys — all xmargin data lives under 'xmargin-*' */
 export const KEYS = {
-	theme: 'margin-theme',
-	settings: 'margin-settings-v1',
-	bookmarks: 'margin-bookmarks',
-	mode: 'margin-mode',
-	content: 'margin-content-v1',
-	diffContent: 'margin-diff-v1',
-	examineSet: 'margin-examine-set-v1',
-	examineSession: 'margin-examine-session-v1',
-	position: (hash: string) => `margin-position-${hash}`
+	theme: 'xmargin-theme',
+	settings: 'xmargin-settings-v1',
+	bookmarks: 'xmargin-bookmarks',
+	mode: 'xmargin-mode',
+	content: 'xmargin-content-v1',
+	diffContent: 'xmargin-diff-v1',
+	examineSet: 'xmargin-examine-set-v1',
+	examineSession: 'xmargin-examine-session-v1',
+	position: (hash: string) => `xmargin-position-${hash}`
 } satisfies Record<string, string | ((hash: string) => string)>;
 
 /**
@@ -65,7 +65,7 @@ export function purgeExpiredPositions(): void {
 		const toRemove: string[] = [];
 		for (let i = 0; i < localStorage.length; i++) {
 			const key = localStorage.key(i);
-			if (key?.startsWith('margin-position-')) {
+			if (key?.startsWith('xmargin-position-')) {
 				const raw = localStorage.getItem(key);
 				if (raw) {
 					const pos = JSON.parse(raw) as { savedAt?: number };

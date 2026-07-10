@@ -1,5 +1,5 @@
 /**
- * Margin Markdown Pipeline
+ * xMargin Markdown Pipeline
  *
  * Parses raw Markdown into HTML + metadata using the unified ecosystem.
  *
@@ -141,15 +141,15 @@ async function ensureShiki() {
 		// Lazy-import so Shiki is never in the initial bundle
 		const { createHighlighter } = await import('shiki');
 		// Store on globalThis so the singleton persists across calls in the browser
-		if (!(globalThis as Record<string, unknown>).__marginShiki) {
-			(globalThis as Record<string, unknown>).__marginShiki = await createHighlighter({
+		if (!(globalThis as Record<string, unknown>).__xmarginShiki) {
+			(globalThis as Record<string, unknown>).__xmarginShiki = await createHighlighter({
 				themes: ['github-light', 'vitesse-dark'],
 				langs: [] // languages loaded on demand per document
 			});
 		}
 		shikiImported = true;
 	}
-	return (globalThis as Record<string, unknown>).__marginShiki as Awaited<
+	return (globalThis as Record<string, unknown>).__xmarginShiki as Awaited<
 		ReturnType<typeof import('shiki').createHighlighter>
 	>;
 }
@@ -254,7 +254,7 @@ export async function parseMarkdown(raw: string): Promise<ParsedDoc> {
 			html = String(shikiFile);
 		} catch (e) {
 			// Shiki failed — use the non-highlighted HTML we already have
-			console.warn('[margin] Shiki highlighting failed, using plain code blocks:', e);
+			console.warn('[xmargin] Shiki highlighting failed, using plain code blocks:', e);
 		}
 	}
 

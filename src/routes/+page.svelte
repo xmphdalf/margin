@@ -70,7 +70,7 @@
 </script>
 
 <svelte:head>
-	<title>Margin</title>
+	<title>xMargin</title>
 	<meta name="description" content="A reader-first Markdown web application. Paste, upload, or fetch any Markdown and read it in a calm, immersive layout." />
 </svelte:head>
 
@@ -78,7 +78,7 @@
 
 <main class="home-main" id="main-content">
 	<div class="home-hero">
-		<h1 class="hero-title">margin</h1>
+		<h1 class="hero-title">xmargin</h1>
 		<div class="hero-sub">
 			A quiet place to
 			<span class="mode-selector">

@@ -71,7 +71,7 @@
 </script>
 
 <svelte:head>
-	<title>Examine — Margin</title>
+	<title>Examine — xMargin</title>
 </svelte:head>
 
 <SiteHeader showHomeLink={true} homeLinkLabel="new set" homeLinkHref="{base}/?mode=examine">

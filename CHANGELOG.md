@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Margin are documented in this file.
+All notable changes to xMargin are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -15,6 +15,17 @@ Commits follow the [Conventional Commits](https://www.conventionalcommits.org/en
 
 ## [Unreleased]
 
+---
+
+## [1.0.0] — 2026-07-10
+
+### Changed
+
+- **Rebrand: Margin → xMargin** — the bare `margin` domain wasn't available,
+  so the product now lives at [xmargin.app](https://xmargin.app). Wordmark,
+  page titles, and docs updated throughout; localStorage moved to a new
+  `xmargin-*` key namespace (fresh origin, no migration needed).
+
 ### Added
 
 - **Case studies in Examine** — a question set may now include a `caseStudies`
@@ -25,7 +36,7 @@ Commits follow the [Conventional Commits](https://www.conventionalcommits.org/en
   Blank lines in the body separate paragraphs. Mirrors the case-study format
   used by GCP-style certification exams. (#14)
 
-- **Examine — quiz/study module** — Margin's third native module, alongside
+- **Examine — quiz/study module** — xMargin's third native module, alongside
   Markdown and git diff reading. Paste or upload a JSON question set (single-
   choice, multi-correct, and true/false questions), pick a question range and
   a mode, then study:
@@ -42,7 +53,7 @@ Commits follow the [Conventional Commits](https://www.conventionalcommits.org/en
   Results report counts honestly — "you answered N of M correctly," never a
   percentage or grade — with a full per-question breakdown and a "questions
   to revisit" list (incorrect answers ∪ flagged questions). Sessions persist
-  to localStorage (`margin-examine-set-v1`, `margin-examine-session-v1`) and
+  to localStorage (`xmargin-examine-set-v1`, `xmargin-examine-session-v1`) and
   resume after a refresh, with a 90-day expiry matching reading-position
   persistence. New route: `/examine`, entered via a third option in the
   home page's mode dropdown.
@@ -103,7 +114,7 @@ Commits follow the [Conventional Commits](https://www.conventionalcommits.org/en
 
 ### Added
 
-- **System theme default** — when no theme preference is stored, Margin now
+- **System theme default** — when no theme preference is stored, xMargin now
   respects the OS `prefers-color-scheme` media query and starts in Dark mode on
   dark-mode systems instead of always defaulting to Light.
 
@@ -285,7 +296,7 @@ Initial scaffold release.
 - Font size slider (14–24px range)
 - Line height slider (1.4–2.0 range)
 - Reading column width: Narrow (60ch) / Default (68ch) / Wide (80ch)
-- All settings persisted to localStorage with versioned schema (`margin-settings-v1`)
+- All settings persisted to localStorage with versioned schema (`xmargin-settings-v1`)
 
 **Presentation mode**
 - Slides delimited by `\n---\n`
@@ -311,10 +322,11 @@ Initial scaffold release.
 
 ---
 
-[Unreleased]: https://github.com/xmphdalf/margin/compare/v0.1.5...HEAD
-[0.1.5]: https://github.com/xmphdalf/margin/compare/v0.1.4...v0.1.5
-[0.1.4]: https://github.com/xmphdalf/margin/compare/v0.1.3...v0.1.4
-[0.1.3]: https://github.com/xmphdalf/margin/compare/v0.1.2...v0.1.3
-[0.1.2]: https://github.com/xmphdalf/margin/compare/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/xmphdalf/margin/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/xmphdalf/margin/releases/tag/v0.1.0
+[Unreleased]: https://github.com/xmphdalf/xmargin/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/xmphdalf/xmargin/compare/v0.1.5...v1.0.0
+[0.1.5]: https://github.com/xmphdalf/xmargin/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/xmphdalf/xmargin/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/xmphdalf/xmargin/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/xmphdalf/xmargin/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/xmphdalf/xmargin/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/xmphdalf/xmargin/releases/tag/v0.1.0

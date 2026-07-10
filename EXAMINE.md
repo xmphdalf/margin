@@ -2,9 +2,9 @@
 
 ## I. Overview
 
-**Examine** is margin's third native module — a reader-first knowledge assessment and learning companion. It transforms question sets into a calm, focused learning experience that respects deep thinking and honest self-knowledge over performance theater.
+**Examine** is xMargin's third native module — a reader-first knowledge assessment and learning companion. It transforms question sets into a calm, focused learning experience that respects deep thinking and honest self-knowledge over performance theater.
 
-Examine follows margin's core principle: *reading requires space*. But instead of reading prose or code, users read questions, answers, and patterns in their own understanding.
+Examine follows xMargin's core principle: *reading requires space*. But instead of reading prose or code, users read questions, answers, and patterns in their own understanding.
 
 ---
 
@@ -26,7 +26,7 @@ Instead, examine embraces:
 - **Breathing room** — Space between content for contemplation
 - **Privacy** — No tracking, no data collection beyond what you need
 
-### Design Principles (Inherited from Margin)
+### Design Principles (Inherited from xMargin)
 
 1. **Interface disappears behind content**
    - The question and answer matter; the UI doesn't
@@ -420,7 +420,7 @@ Or single-page app with state-driven view switching.
 ### D. localStorage Schema
 
 ```javascript
-// Key: 'margin-examine-session'
+// Key: 'xmargin-examine-session'
 {
   sessions: [
     {
@@ -434,7 +434,7 @@ Or single-page app with state-driven view switching.
     defaultMode: 'examine',
     showTimer: true,
     autoSaveInterval: 5000,
-    theme: 'light' // inherits from margin's theme system
+    theme: 'light' // inherits from xMargin's theme system
   }
 }
 ```
@@ -667,7 +667,7 @@ the stem in every mode (Read, Reflect, Examine, Results).
 
 ## VI. The Feel & Visual Design
 
-### Color Palette (Using Margin's Tokens)
+### Color Palette (Using xMargin's Tokens)
 
 ```css
 /* Question text — primary ink, serif */
@@ -693,7 +693,7 @@ the stem in every mode (Read, Reflect, Examine, Results).
   background-color: oklch(0.97 0.01 260);
 }
 
-/* Correct answer — success green (from margin's diff palette) */
+/* Correct answer — success green (from xMargin's diff palette) */
 .option.correct,
 .mark-correct {
   color: var(--color-add);
@@ -701,7 +701,7 @@ the stem in every mode (Read, Reflect, Examine, Results).
   background-color: var(--color-add-tint);
 }
 
-/* Incorrect answer — error red (from margin's diff palette) */
+/* Incorrect answer — error red (from xMargin's diff palette) */
 .option.incorrect,
 .mark-incorrect {
   color: var(--color-del);
@@ -931,7 +931,7 @@ the stem in every mode (Read, Reflect, Examine, Results).
 
 ### Dark & Sepia Theme Support
 
-Examine inherits all theme switching from margin's AppShell. No special theme logic needed — just use `var(--color-*)` tokens.
+Examine inherits all theme switching from xMargin's AppShell. No special theme logic needed — just use `var(--color-*)` tokens.
 
 ---
 
@@ -964,7 +964,7 @@ Examine inherits all theme switching from margin's AppShell. No special theme lo
 1. User on Q 12 of 25 in Examine mode
    → Accidentally closes tab or refreshes
 
-2. Returns to margin, navigates back to /examine
+2. Returns to xmargin, navigates back to /examine
    → "Resume?" prompt appears
    → "Continue from Q 12" or "Start fresh"
 
@@ -1061,7 +1061,7 @@ Examine inherits all theme switching from margin's AppShell. No special theme lo
 - [ ] Basic results view
 - [ ] localStorage persistence
 - [ ] Range selection
-- [ ] Styling using margin's tokens
+- [ ] Styling using xMargin's tokens
 
 ### Phase 2: Complete Experience (1 week)
 - [ ] Read mode (browse all)
@@ -1173,7 +1173,7 @@ Examine takes the best from these — calm, focused, honest, beautiful — and a
 
 ## XVII. Final Vision
 
-**Examine** is margin's answer to a simple question:
+**Examine** is xMargin's answer to a simple question:
 
 > *What if learning felt like stepping into a quiet library, not taking a test in a stressful classroom?*
 

@@ -90,13 +90,13 @@
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
 		// 8. Analytics — load saved sessions; session lifecycle managed by $effect below
-		const savedSessions = storageGet<ReadingSession[]>('margin-analytics-v1', []);
+		const savedSessions = storageGet<ReadingSession[]>('xmargin-analytics-v1', []);
 		analyticsState.setSessions(savedSessions);
 
 		// End session when page hides (tab switch, close)
 		function handlePageHide() {
 			analyticsState.endSession();
-			storageSet('margin-analytics-v1', analyticsState.sessions);
+			storageSet('xmargin-analytics-v1', analyticsState.sessions);
 		}
 		window.addEventListener('pagehide', handlePageHide);
 
@@ -144,7 +144,7 @@
 	// ── Persist analytics sessions ───────────────────────────────────────────
 	$effect(() => {
 		if (analyticsState.sessions.length > 0) {
-			storageSet('margin-analytics-v1', analyticsState.sessions);
+			storageSet('xmargin-analytics-v1', analyticsState.sessions);
 		}
 	});
 
@@ -178,7 +178,7 @@
 		if (hash === _prevDocHash) return;
 		if (_prevDocHash) {
 			analyticsState.endSession();
-			storageSet('margin-analytics-v1', analyticsState.sessions);
+			storageSet('xmargin-analytics-v1', analyticsState.sessions);
 		}
 		_prevDocHash = hash;
 		if (hash) analyticsState.startSession(hash);

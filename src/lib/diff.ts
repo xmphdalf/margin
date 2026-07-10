@@ -276,14 +276,14 @@ function detectLang(path: string): string {
 
 async function getHighlighter(): Promise<Highlighter> {
 	const g = globalThis as Record<string, unknown>;
-	if (!g.__marginShiki) {
+	if (!g.__xmarginShiki) {
 		const { createHighlighter } = await import('shiki');
-		g.__marginShiki = await createHighlighter({
+		g.__xmarginShiki = await createHighlighter({
 			themes: ['github-light', 'vitesse-dark'],
 			langs: []
 		});
 	}
-	return g.__marginShiki as Highlighter;
+	return g.__xmarginShiki as Highlighter;
 }
 
 // ─── Main export ──────────────────────────────────────────────────────────────

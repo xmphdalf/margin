@@ -37,8 +37,8 @@
 	// ─── Computed ─────────────────────────────────────────────────────────────────
 	const pageTitle = $derived(
 		diff
-			? `${diff.meta.title} — Margin`
-			: 'Diff — Margin'
+			? `${diff.meta.title} — xMargin`
+			: 'Diff — xMargin'
 	);
 
 	const hunkStarts = $derived(
@@ -62,7 +62,7 @@
 			showSpine?: boolean;
 			showKeystrokes?: boolean;
 			showMarginalia?: boolean;
-		}>('margin-diff-prefs', {});
+		}>('xmargin-diff-prefs', {});
 		if (saved.softness) softness = saved.softness;
 		if (saved.density) density = saved.density;
 		if (saved.prefixMode) prefixMode = saved.prefixMode;
@@ -72,7 +72,7 @@
 	});
 
 	$effect(() => {
-		storageSet('margin-diff-prefs', {
+		storageSet('xmargin-diff-prefs', {
 			softness,
 			density,
 			prefixMode,
