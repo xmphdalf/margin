@@ -488,8 +488,12 @@ adapter: adapter({ fallback: 'index.html' })
 ```
 # Caddyfile
 :{$PORT} {
-  root * /srv
   encode gzip
+
+  @legacy host margin.up.railway.app
+  redir @legacy https://xmargin.app{uri} permanent
+
+  root * /srv
   try_files {path} /index.html
   file_server
 }
@@ -500,6 +504,33 @@ adapter: adapter({ fallback: 'index.html' })
 - Root layout: `export const prerender = true`
 - No `BASE_PATH` — deployed to root domain, `base` is always `''`
 - GitHub Actions runs tests and creates releases; Railway deploys independently via native GitHub integration
+- The `@legacy` block 301-redirects the original Railway-provided subdomain (`margin.up.railway.app`, from before the custom domain existed) to the canonical apex — kept rather than deleted, since it may still be bookmarked
+
+### Custom Domain Setup (Railway + Cloudflare)
+
+The canonical domain is the bare apex `xmargin.app`, not a Railway-provided subdomain. Getting an apex domain working on Railway surfaced two non-obvious platform gotchas, both worth knowing before touching domain config again:
+
+**1. Railway has no static IP — apex domains need CNAME flattening, which most registrars (including GoDaddy) can't do.**
+A CNAME record is structurally disallowed at a DNS zone's apex/root by the DNS spec, and Railway doesn't publish a static IP for an `A` record fallback. The fix is **CNAME flattening**, which GoDaddy's DNS does not support at all. The working setup: registration stays at the original registrar, but **DNS management (nameservers) moves to Cloudflare** (free plan), which does support apex CNAME flattening. `www` (and the old `margin.up.railway.app`) redirect to the apex via a **Cloudflare Redirect Rule** (Rules → Single Redirect) — handled entirely at Cloudflare's edge, never touching the Railway origin.
+
+**2. Railway's custom-domain `dnsRecords` status can silently omit the TXT ownership-verification requirement.**
+Querying a custom domain's `status.dnsRecords` via the GraphQL API (or the dashboard's "Show DNS records" dialog) may show a CNAME as the only pending requirement, with no TXT record listed — even when Railway is still internally gating traffic on a domain-ownership TXT check. Symptom: DNS is fully `PROPAGATED`, TLS cert issues successfully (`certificateStatus: VALID`), the domain shows `syncStatus: ACTIVE`, and the domain is correctly attached to the service — but every request still 404s at the edge with `x-railway-fallback: true` / `"Application not found"`. This can burn hours before Railway support surfaces the actual field: `status.verified` (Boolean), `status.verificationToken`, and `status.verificationDnsHost` are separate fields from `dnsRecords`, only found via the Railway community forum (station.railway.com), not the dashboard UI. **Fix:** add a TXT record at `{verificationDnsHost}.{domain}` (e.g. `_railway-verify.xmargin.app`) with the exact value from `verificationToken` (e.g. `railway-verify=<token>`) — do this even if the dashboard never explicitly asked for it. `status.verified` flips to `true` once Railway's edge picks it up (a few minutes, not instant).
+
+Query pattern for full domain diagnostics (GraphQL, `https://backboard.railway.com/graphql/v2`):
+```graphql
+query {
+  domains(projectId: "...", serviceId: "...", environmentId: "...") {
+    customDomains {
+      id domain syncStatus
+      status {
+        verified verificationToken verificationDnsHost
+        certificateStatus certificateStatusDetailed
+        dnsRecords { hostlabel recordType requiredValue currentValue status }
+      }
+    }
+  }
+}
+```
 
 ### LocalStorage Schema
 
