@@ -77,7 +77,7 @@ Initial JS bundle target: under 50KB gzipped.
 - [CONTRIBUTING.md](CONTRIBUTING.md) — dev workflow, commit conventions, release process, design principles
 - [CHANGELOG.md](CHANGELOG.md) — full version history
 
----
+----
 
 ## License
 
