@@ -92,6 +92,7 @@
 
 <svelte:head>
 	<title>{pageTitle}</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <div data-mode={readerState.mode} class="read-shell">

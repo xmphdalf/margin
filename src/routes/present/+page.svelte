@@ -132,6 +132,7 @@
 
 <svelte:head>
 	<title>Presentation — xMargin</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <svelte:window onkeydown={handleKeydown} />

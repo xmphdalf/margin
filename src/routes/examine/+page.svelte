@@ -72,6 +72,7 @@
 
 <svelte:head>
 	<title>Examine — xMargin</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <SiteHeader showHomeLink={true} homeLinkLabel="new set" homeLinkHref="{base}/?mode=examine">

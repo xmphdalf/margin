@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /read/
+Disallow: /diff/
+Disallow: /examine/
+Disallow: /present/
+
+Sitemap: https://xmargin.app/sitemap.xml

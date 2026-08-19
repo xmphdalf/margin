@@ -70,8 +70,46 @@
 </script>
 
 <svelte:head>
-	<title>xMargin</title>
-	<meta name="description" content="A reader-first Markdown web application. Paste, upload, or fetch any Markdown and read it in a calm, immersive layout." />
+	<title>xMargin — A Calm Reading Studio for Markdown</title>
+	<meta
+		name="description"
+		content="xMargin turns raw Markdown, git diffs, and quiz sets into a calm, distraction-free reading experience. Paste, upload, or fetch a URL — no account, no backend, nothing tracked."
+	/>
+	<link rel="canonical" href="https://xmargin.app/" />
+
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content="xMargin" />
+	<meta property="og:url" content="https://xmargin.app/" />
+	<meta property="og:title" content="xMargin — A Calm Reading Studio for Markdown" />
+	<meta
+		property="og:description"
+		content="Turn raw Markdown, git diffs, and quiz sets into a calm, distraction-free reading experience. Paste, upload, or fetch a URL — no account, no backend, nothing tracked."
+	/>
+	<meta property="og:image" content="https://xmargin.app/og-image.png" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	<meta property="og:image:alt" content="xMargin — a calm reading studio for Markdown, diffs & quizzes" />
+
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="xMargin — A Calm Reading Studio for Markdown" />
+	<meta
+		name="twitter:description"
+		content="Turn raw Markdown, git diffs, and quiz sets into a calm, distraction-free reading experience."
+	/>
+	<meta name="twitter:image" content="https://xmargin.app/og-image.png" />
+
+	{@html `<script type="application/ld+json">${JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'WebApplication',
+		name: 'xMargin',
+		url: 'https://xmargin.app/',
+		description:
+			'A reader-first Markdown web application. Turns raw Markdown, git diffs, and quiz sets into a calm, immersive reading experience.',
+		applicationCategory: 'UtilitiesApplication',
+		operatingSystem: 'Any',
+		offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+		sameAs: ['https://github.com/xmphdalf/xmargin']
+	})}</script>`}
 </svelte:head>
 
 <SiteHeader />

@@ -5,7 +5,7 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 export default {
 	preprocess: vitePreprocess(),
 	kit: {
-		adapter: adapter({ fallback: 'index.html' }),
+		adapter: adapter({ fallback: '200.html' }),
 		prerender: { handleHttpError: 'warn' }
 	}
 };
